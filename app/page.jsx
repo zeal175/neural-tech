@@ -123,7 +123,7 @@ const btnBase =
 const btnOutline = `${btnBase} border-paper text-paper`;
 const btnPrimary = `${btnBase} border-[#070605] bg-acid text-[#070605]`;
 
-const sectionPad = "px-6 py-[110px] md:px-[7vw] md:py-[150px] xl:mx-auto xl:max-w-[1680px] xl:px-14 xl:py-[170px]";
+const sectionPad = "px-5 py-20 sm:px-6 sm:py-[110px] md:px-[7vw] md:py-[150px] xl:mx-auto xl:max-w-[1680px] xl:px-14 xl:py-[170px]";
 
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -131,21 +131,28 @@ export default function Home() {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
+    const onResize = () => {
+      if (window.innerWidth >= 768) setMenuOpen(false);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onResize);
+    };
   }, []);
 
   return (
     <main className="bg-ink text-paper">
       <header
-        className={`fixed inset-x-0 top-0 z-40 flex h-[72px] items-center justify-around px-[4.5vw] transition-[background,border-color,backdrop-filter,box-shadow] duration-300 ${
-          scrolled
-            ? "border-b border-white/[0.06] bg-ink/60 shadow-[0_1px_0_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-[18px] backdrop-saturate-150"
+        className={`fixed inset-x-0 top-0 z-40 flex h-[64px] items-center justify-between px-5 transition-[background,border-color,backdrop-filter,box-shadow] duration-300 sm:h-[72px] md:justify-around md:px-[4.5vw] ${
+          scrolled || menuOpen
+            ? "border-b border-white/[0.06] bg-ink/80 shadow-[0_1px_0_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.03)] backdrop-blur-[18px] backdrop-saturate-150"
             : "border-b border-transparent bg-transparent"
         }`}
       >
-        <a className="flex items-center gap-2.5 font-mono text-[0.72rem] font-bold tracking-[0.14em]" href="#top" aria-label="Neural Tech home">
+        <a className="relative z-50 flex items-center gap-2.5 font-mono text-[0.68rem] font-bold tracking-[0.14em] sm:text-[0.72rem]" href="#top" aria-label="Neural Tech home">
           <Mark />
           <span>NEURAL/TECH</span>
         </a>
@@ -153,7 +160,7 @@ export default function Home() {
         <nav
           className={`${
             menuOpen ? "flex" : "hidden"
-          } absolute inset-x-0 top-[71px] flex-col gap-6 border-b border-line bg-ink px-6 py-7 md:static md:flex md:flex-row md:gap-8 md:border-0 md:bg-transparent md:p-0`}
+          } absolute inset-x-0 top-[63px] flex-col gap-6 border-b border-line bg-ink px-5 py-7 sm:top-[71px] md:static md:flex md:flex-row md:gap-8 md:border-0 md:bg-transparent md:p-0`}
           aria-label="Main navigation"
         >
           {[
@@ -177,7 +184,7 @@ export default function Home() {
           Join the network <ArrowRight size={15} />
         </a>
         <button
-          className="border-0 bg-transparent p-0 md:hidden"
+          className="relative z-50 border-0 bg-transparent p-2 md:hidden"
           aria-label="Toggle navigation"
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
@@ -186,31 +193,31 @@ export default function Home() {
         </button>
       </header>
 
-      {/* Hero — tweak image with w-* / bottom-* / left-* / translate-* breakpoints */}
+      {/* Hero — stacked on mobile, overlay from md up */}
       <section
         id="top"
-        className="relative isolate flex min-h-[700px] h-screen items-start justify-center overflow-hidden bg-ink px-6 pt-[72px] md:min-h-[760px] md:px-[7vw] xl:mx-auto xl:max-w-[1680px]"
+        className="relative isolate flex flex-col overflow-hidden bg-ink px-4 pb-8 pt-[88px] md:h-screen md:min-h-[760px] md:items-start md:justify-center md:px-[7vw] md:pb-0 md:pt-[72px] xl:mx-auto xl:max-w-[1680px]"
       >
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-0 flex justify-center animate-[hero-reveal_1.2s_ease_both]">
+        <div className="pointer-events-none relative z-0 order-2 mt-4 w-[100vw] max-w-none self-center animate-[hero-reveal_1.2s_ease_both] md:absolute md:inset-x-0 md:bottom-0 md:mt-0 md:flex md:w-auto md:justify-center">
           <img
             src="/neural-tech-hero.png"
             alt=""
             aria-hidden="true"
-            className="w-[92vw] max-w-none animate-[float-y_6s_ease-in-out_1.2s_infinite] contrast-[1.05] saturate-100 md:w-[min(88vw,1320px)] xl:w-[min(74vw,1460px)] 2xl:w-[min(88.8vw,1776px)]"
+            className="mx-auto h-auto w-full max-w-none animate-[float-y_6s_ease-in-out_1.2s_infinite] object-contain contrast-[1.05] saturate-100 md:w-[min(88vw,1320px)] xl:w-[min(66.6vw,1314px)] 2xl:w-[min(79.92vw,1598px)]"
           />
         </div>
 
-        <div className="absolute inset-x-0 top-[180px] z-10 mx-auto flex w-full max-w-[1200px] flex-col items-center px-4 text-center md:top-[208px] xl:top-[220px] 2xl:top-[calc(147px+20vh)]">
-          <h1 className="m-0 flex w-full flex-col items-center text-center font-sans font-black uppercase leading-[0.9] tracking-[-0.04em]">
-            <span className="block w-full animate-[fade-up_0.7s_ease_both] whitespace-nowrap text-center text-[clamp(1.7rem,6.2vw,4.8rem)] 2xl:text-[clamp(2.04rem,7.44vw,5.76rem)]">
+        <div className="relative z-10 order-1 mx-auto flex w-full max-w-[1200px] flex-col items-center px-2 text-center md:absolute md:inset-x-0 md:top-[208px] md:px-4 xl:top-[178px] 2xl:top-[calc(119px+16.2vh)]">
+          <h1 className="m-0 flex w-full flex-col items-center text-center font-sans font-black uppercase leading-[0.92] tracking-[-0.04em]">
+            <span className="block w-full animate-[fade-up_0.7s_ease_both] text-center text-[clamp(1.55rem,8.6vw,2.4rem)] sm:whitespace-nowrap sm:text-[clamp(1.7rem,6.2vw,4.8rem)] xl:text-[clamp(1.53rem,5.58vw,4.32rem)] 2xl:text-[clamp(1.84rem,6.7vw,5.18rem)]">
               NOT YOUR AVERAGE
             </span>
-            <span className="mt-1 block w-full animate-[fade-up_0.7s_ease_0.12s_both] text-center font-display text-[clamp(1.8rem,5.8vw,5.4rem)] font-normal italic lowercase tracking-[-0.02em] text-acid 2xl:text-[clamp(2.16rem,6.96vw,6.48rem)]">
+            <span className="mt-1 block w-full animate-[fade-up_0.7s_ease_0.12s_both] text-center font-display text-[clamp(1.7rem,9.5vw,2.6rem)] font-normal italic lowercase tracking-[-0.02em] text-acid sm:text-[clamp(1.8rem,5.8vw,5.4rem)] xl:text-[clamp(1.62rem,5.22vw,4.86rem)] 2xl:text-[clamp(1.94rem,6.26vw,5.83rem)]">
               tech club
             </span>
           </h1>
-          <div className="mt-6 flex w-full animate-[fade-up_0.7s_ease_0.24s_both] flex-col items-center justify-center gap-4 sm:flex-row sm:gap-[22px]">
-            <a className={`${btnPrimary} text-[0.7rem] font-semibold tracking-[0.04em] hover:brightness-105`} href="#join">
+          <div className="mt-5 flex w-full animate-[fade-up_0.7s_ease_0.24s_both] flex-col items-center justify-center gap-3 sm:mt-6 sm:flex-row sm:gap-[22px]">
+            <a className={`${btnPrimary} w-full max-w-[260px] text-[0.7rem] font-semibold tracking-[0.04em] hover:brightness-105 sm:w-auto`} href="#join">
               Join Neural Tech <ArrowRight size={16} stroke="#070605" />
             </a>
             <a
@@ -222,12 +229,12 @@ export default function Home() {
           </div>
         </div>
 
-        <p className="absolute bottom-[30px] right-[4vw] hidden animate-[fade-up_0.8s_ease_0.4s_both] font-mono text-[0.58rem] tracking-[0.15em] text-[#747b72] sm:block">
+        <p className="absolute bottom-[30px] right-[4vw] hidden animate-[fade-up_0.8s_ease_0.4s_both] font-mono text-[0.58rem] tracking-[0.15em] text-[#747b72] md:block">
           12.9716° N / 77.5946° E
         </p>
       </section>
 
-      <Reveal as="section" className="border-y border-line bg-panel-2 px-[7vw] py-12 text-center md:py-14" aria-label="Community disciplines">
+      <Reveal as="section" className="border-y border-line bg-panel-2 px-5 py-10 text-center sm:px-[7vw] sm:py-12 md:py-14" aria-label="Community disciplines">
         <p className="mb-6 font-mono text-[0.58rem] tracking-[0.18em] text-[#7e847b]">THE FREQUENCIES WE SHARE</p>
         <div className="grid grid-cols-1 md:grid-cols-5">
           {["ARTIFICIAL INTELLIGENCE", "CREATIVE CODE", "ROBOTICS", "DESIGN", "RESEARCH"].map((item) => (
@@ -242,18 +249,18 @@ export default function Home() {
       </Reveal>
 
       <section
-        className={`relative flex min-h-[690px] flex-col items-center justify-center overflow-hidden bg-ink text-center text-paper ${sectionPad}`}
+        className={`relative flex min-h-0 flex-col items-center justify-center overflow-hidden bg-ink text-center text-paper md:min-h-[690px] ${sectionPad}`}
         id="about"
       >
         <Reveal>
-          <h2 className="m-0 text-[3.3rem] font-black leading-[0.86] tracking-[-0.075em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
+          <h2 className="m-0 text-[clamp(2.15rem,10vw,3.3rem)] font-black leading-[0.9] tracking-[-0.06em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
             TECH MOVES FAST.
             <br />
             <em className="font-display font-normal lowercase text-acid italic">we move together.</em>
           </h2>
         </Reveal>
         <Reveal delay={1}>
-          <p className="mx-auto mt-[34px] max-w-[690px] text-[1.05rem] leading-[1.8] text-muted">
+          <p className="mx-auto mt-6 max-w-[690px] px-1 text-[0.95rem] leading-[1.75] text-muted sm:mt-[34px] sm:text-[1.05rem] sm:leading-[1.8]">
             The future is being built in closed rooms, complicated threads, and lonely browser tabs. We think learning
             should be social, playful, and a little strange.
           </p>
@@ -354,7 +361,7 @@ export default function Home() {
 
       <section className={`bg-panel-2 text-paper ${sectionPad}`} id="community">
         <Reveal>
-          <h2 className="m-0 max-w-[1050px] text-[3.3rem] font-black leading-[0.86] tracking-[-0.075em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
+          <h2 className="m-0 max-w-[1050px] text-[clamp(2.15rem,10vw,3.3rem)] font-black leading-[0.9] tracking-[-0.06em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
             BUILT FOR A DIFFERENT
             <br />
             KIND OF <em className="font-display font-normal lowercase text-acid italic">club.</em>
@@ -382,20 +389,20 @@ export default function Home() {
       {/* Join — tweak image with right-* / bottom-* / w-* / translate-* breakpoints */}
       <section
         id="join"
-        className="relative min-h-[620px] overflow-hidden border-y border-line bg-transparent px-8 py-[130px] text-paper md:px-[8vw] md:py-[180px] xl:mx-auto xl:max-w-[1680px] xl:px-20 xl:py-[200px]"
+        className="relative min-h-0 overflow-hidden border-y border-line bg-transparent px-5 py-20 text-paper sm:px-8 sm:py-[130px] md:min-h-[620px] md:px-[8vw] md:py-[180px] xl:mx-auto xl:max-w-[1680px] xl:px-20 xl:py-[200px]"
       >
         <img
           src="/neural-tech-footer.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 right-[-40px] z-0 w-[min(100%,900px)] max-w-none md:right-[-100px] md:w-[min(100%,1200px)] xl:right-[-170px] xl:w-[min(100%,1400px)] 2xl:bottom-[60px]"
+          className="pointer-events-none absolute bottom-[-20px] right-[-80px] z-0 w-[min(140%,720px)] max-w-none opacity-80 sm:bottom-0 sm:right-[-40px] sm:w-[min(100%,900px)] sm:opacity-100 md:right-[-100px] md:w-[min(100%,1200px)] xl:right-[-170px] xl:w-[min(100%,1400px)] 2xl:bottom-[60px]"
         />
 
         <Reveal className="relative z-10 max-w-[720px]">
           <p className="mb-9 flex w-max items-center gap-2 font-mono text-[0.64rem] font-medium uppercase tracking-[0.12em] text-[#c0c5bb]">
             <Radio size={13} className="text-acid" /> Open channel
           </p>
-          <h2 className="relative z-10 m-0 text-[3.3rem] font-black leading-[0.86] tracking-[-0.075em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
+          <h2 className="relative z-10 m-0 text-[clamp(2.15rem,10vw,3.3rem)] font-black leading-[0.9] tracking-[-0.06em] md:text-[clamp(3.6rem,6.5vw,7.2rem)]">
             COME BUILD THE
             <br />
             <em className="font-display font-normal lowercase text-acid italic">future with us.</em>
@@ -407,7 +414,7 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <footer className="relative grid min-h-40 grid-cols-1 items-center gap-6 overflow-hidden bg-transparent px-6 py-[55px] font-mono text-[0.58rem] tracking-[0.1em] text-[#858b82] md:grid-cols-2 md:px-[7vw] md:py-10 lg:grid-cols-[1fr_1fr_1fr_auto]">
+      <footer className="relative grid min-h-40 grid-cols-1 items-start gap-5 overflow-hidden bg-transparent px-5 py-12 font-mono text-[0.58rem] tracking-[0.1em] text-[#858b82] sm:px-6 sm:py-[55px] md:grid-cols-2 md:items-center md:px-[7vw] md:py-10 lg:grid-cols-[1fr_1fr_1fr_auto]">
         <a className="flex items-center gap-2.5 font-mono text-[0.72rem] font-bold tracking-[0.14em] text-paper" href="#top">
           <Mark />
           <span>NEURAL/TECH</span>

@@ -20,6 +20,11 @@
     scroll-behavior: smooth;
   }
 
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   body {
     min-width: 320px;
     margin: 0;

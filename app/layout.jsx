@@ -5,10 +5,38 @@ import "@fontsource/poppins/700.css";
 import "@fontsource/poppins/900.css";
 import "./globals.css";
 
+const siteName = "Neural Tech";
+const title = "Neural Tech — Not Your Average Tech Club";
+const description =
+  "A community of curious minds exploring AI, emerging technology, and the ideas shaping tomorrow.";
+
 export const metadata = {
-  title: "Neural Tech — Build What Comes Next",
-  description:
-    "A community of curious minds exploring AI, emerging technology, and the ideas shaping tomorrow.",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://neuraltech.club"),
+  title,
+  description,
+  applicationName: siteName,
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName,
+    title,
+    description,
+    images: [
+      {
+        url: "/neural-tech-OG.png",
+        width: 1733,
+        height: 907,
+        alt: "Neural Tech — retro arcade club visual with neon arcade cabinet and pixel icons",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/neural-tech-OG.png"],
+  },
 };
 
 export default function RootLayout({ children }) {

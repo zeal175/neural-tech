@@ -226,10 +226,10 @@ export default function Home() {
 
       <section id="join" className={`cv-auto bg-blush text-center text-soil ${pad}`}>
         <div className="mx-auto w-full max-w-[1280px] px-5 sm:px-6">
-          <LineReveal as="h2" className={`${heroDisplay} mx-auto`} lines={["Stop lurking.", "Start shipping."]} />
+          <LineReveal as="h2" className={`${heroDisplay} mx-auto`} lines={["We promise", "nothing normal."]} />
           <Reveal delay={2}>
             <p className="mx-auto mt-5 max-w-[38ch] text-[0.95rem] leading-[1.65] text-soil/80">
-              You don’t need a portfolio, a resume, or a reason. Just show up curious.
+              Not another guest-lecture club. Not another dead group chat. Come find out what we actually are.
             </p>
             <a className={`${btnDark} mt-8 inline-flex`} href="mailto:hello@neuraltech.club">
               Join the club

@@ -1,9 +1,19 @@
-import "@fontsource/poppins/400.css";
-import "@fontsource/poppins/500.css";
-import "@fontsource/poppins/600.css";
-import "@fontsource/poppins/700.css";
-import "@fontsource/poppins/900.css";
+import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-poppins",
+});
+
+const screamer = localFont({
+  src: "./fonts/FKScreamer-Bold.otf",
+  weight: "700",
+  variable: "--font-screamer",
+  display: "swap",
+});
 
 const siteName = "Neural Tech";
 const title = "Neural Tech — Not Your Average Tech Club";
@@ -41,7 +51,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${poppins.variable} ${screamer.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -59,7 +59,7 @@ const challenges = [
   },
 ];
 
-const pad = "relative z-10 px-5 py-20 sm:px-8 sm:py-24 md:px-[6vw] md:py-28 xl:mx-auto xl:max-w-[1440px] xl:px-16";
+const pad = "relative z-10 px-5 py-28 sm:px-8 sm:py-36 md:px-[6vw] md:py-44 xl:mx-auto xl:max-w-[1440px] xl:px-16";
 
 function ChallengeCarousel() {
   const [index, setIndex] = useState(0);
@@ -358,7 +358,7 @@ export default function TartarusPage() {
         </Seen>
       </section>
 
-      <footer className="relative z-10 grid grid-cols-1 gap-4 border-t border-[var(--t-olive)] px-5 py-8 sm:px-8 md:grid-cols-3 md:items-center md:px-[6vw] xl:px-16">
+      <footer className="relative z-10 grid grid-cols-1 gap-4 border-t border-[var(--t-olive)] px-5 py-12 sm:px-8 md:grid-cols-3 md:items-center md:px-[6vw] md:py-16 xl:px-16">
         <a className="t-display text-[1.2rem] text-[var(--t-phosphor)]" href="#top">
           TARTARUS
         </a>

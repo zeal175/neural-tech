@@ -1,5 +1,6 @@
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import Reveal from "./components/Reveal";
 import LineReveal from "./components/LineReveal";
 import SiteHeader from "./components/SiteHeader";
@@ -54,7 +55,7 @@ function Spark({ d, fill }) {
 }
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
-const pad = "py-20 sm:py-24 md:py-28";
+const pad = "py-28 sm:py-36 md:py-44";
 const display =
   "font-display text-[clamp(2.15rem,5.15vw,4.625rem)] font-bold uppercase leading-[0.9] tracking-[0.02em]";
 const spotlight =
@@ -73,19 +74,10 @@ export default function Home() {
     <main className="bg-cream text-soil">
       <SiteHeader />
 
-      <section id="top" className="relative isolate flex min-h-[100svh] items-start justify-center overflow-hidden bg-soil">
+      <section id="top" className="relative isolate flex min-h-[100svh] items-start justify-center overflow-hidden bg-black">
         <Reveal variant="hero" className="absolute inset-0 overflow-hidden">
-          <Image
-            src="/neural-tech-hero.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            quality={70}
-            className="hero-image-drift origin-center object-cover object-center"
-          />
+          <HalftoneFlow className="absolute inset-0 h-full w-full" />
         </Reveal>
-        <div className="absolute inset-0 bg-soil/35" />
         <div className="relative z-10 mx-auto mt-[30vh] flex w-full max-w-[1280px] flex-col items-center px-5 text-center">
           <LineReveal
             as="h1"
@@ -111,7 +103,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="overflow-hidden border-y border-soil/10 bg-cream py-4" aria-label="Community disciplines">
+      <section className="overflow-hidden border-y border-soil/10 bg-cream py-6 sm:py-7" aria-label="Community disciplines">
         <div className="nt-marquee-track flex gap-10 px-6 font-sans text-[1.05rem] font-normal uppercase tracking-[-0.02em] text-soil/55 sm:text-[1.15rem]">
           {[...frequencies, ...frequencies].map((item, index) => (
             <span key={`${item}-${index}`} className="flex items-center gap-12 whitespace-nowrap">
@@ -135,7 +127,7 @@ export default function Home() {
       </section>
 
       <section className="cv-auto bg-blush text-soil">
-        <div className={`${wrap} pt-16 pb-12 sm:pt-20 sm:pb-14 md:pt-24 md:pb-16`}>
+        <div className={`${wrap} pt-24 pb-16 sm:pt-32 sm:pb-20 md:pt-40 md:pb-24`}>
           <LineReveal className={display} lines={["Built for people", "who show up", "twice."]} />
         </div>
       </section>
@@ -145,7 +137,7 @@ export default function Home() {
           <div className="h-1/2 bg-blush" />
           <div className="h-1/2 bg-cream" />
         </div>
-        <div className={`relative ${wrap}`}>
+        <div className={`relative ${wrap} py-8 sm:py-10 md:py-12`}>
           <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {clubStats.map((stat, index) => (
               <Reveal
@@ -178,11 +170,11 @@ export default function Home() {
       </div>
 
       <section id="community" className="relative overflow-x-clip bg-cream">
-        <div className="relative min-h-[560px] w-full md:min-h-[720px]">
+        <div className="relative min-h-[620px] w-full md:min-h-[800px]">
           <div className="pointer-events-auto absolute inset-0 z-0 flex items-center justify-center">
             <ClubSleepMarquee />
           </div>
-          <div className="pointer-events-none relative z-10 mx-auto grid min-h-[560px] max-w-[1240px] grid-cols-2 grid-rows-[auto_1fr_auto] px-5 py-16 sm:px-8 md:min-h-[720px] md:px-10 md:py-20">
+          <div className="pointer-events-none relative z-10 mx-auto grid min-h-[620px] max-w-[1240px] grid-cols-2 grid-rows-[auto_1fr_auto] px-5 py-24 sm:px-8 md:min-h-[800px] md:px-10 md:py-32">
             <LineReveal className={`${spotlight} col-start-1 row-start-1`} lines={["A club"]} />
             <LineReveal
               className={`${spotlight} col-start-2 row-start-3 justify-self-end text-right`}
@@ -191,7 +183,7 @@ export default function Home() {
             />
           </div>
         </div>
-        <div className={`${wrap} pb-20 sm:pb-24 md:pb-28`}>
+        <div className={`${wrap} pt-16 pb-28 sm:pt-20 sm:pb-36 md:pt-24 md:pb-44`}>
           <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
             <LineReveal className={display} lines={["Not a Discord", "server that died", "in week two."]} />
             <Reveal delay={1} className="md:pt-2">
@@ -242,7 +234,7 @@ export default function Home() {
       </section>
 
       <footer className="cv-auto bg-soil text-cream">
-        <div className={`${wrap} py-12 sm:py-14`}>
+        <div className={`${wrap} py-16 sm:py-20 md:py-24`}>
           <a href="#top" className="inline-block" aria-label="Neural Tech home">
             <Image
               src="/neural-tech-logo2.png"

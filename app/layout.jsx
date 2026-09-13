@@ -25,6 +25,11 @@ export const metadata = {
   title,
   description,
   applicationName: siteName,
+  icons: {
+    icon: [{ url: "/neural-tech-logo1.png", type: "image/png" }],
+    apple: [{ url: "/neural-tech-logo1.png", type: "image/png" }],
+    shortcut: "/neural-tech-logo1.png",
+  },
   openGraph: {
     type: "website",
     locale: "en_US",

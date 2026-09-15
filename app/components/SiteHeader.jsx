@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
@@ -13,13 +14,16 @@ const btnDark =
   "inline-flex items-center justify-center rounded-full bg-soil px-5 py-2.5 text-[0.84rem] font-normal text-cream transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98]";
 
 const navItems = [
-  ["#about", "About"],
-  ["#events", "Events"],
+  ["/#about", "About"],
+  ["/#events", "Events"],
   ["/tartarus", "Tartarus"],
-  ["#community", "Community"],
+  ["/#community", "Community"],
+  ["/join", "Join"],
 ];
 
 export default function SiteHeader() {
+  const pathname = usePathname();
+  const onJoin = pathname === "/join";
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [onHero, setOnHero] = useState(true);
@@ -72,7 +76,7 @@ export default function SiteHeader() {
             compact ? "rounded-full bg-white py-1.5 pl-2.5 pr-2 shadow-[0_8px_30px_rgba(65,51,51,0.1)] md:pr-5" : ""
           }`}
         >
-          <a className="relative z-50 flex shrink-0 items-center" href="#top" aria-label="Neural Tech home">
+          <a className="relative z-50 flex shrink-0 items-center" href="/" aria-label="Neural Tech home">
             <Image src="/neural-tech-logo1.png" alt="" width={36} height={36} sizes="36px" className="h-8 w-8 object-contain sm:h-9 sm:w-9" />
           </a>
           <nav
@@ -99,13 +103,15 @@ export default function SiteHeader() {
             className={`hidden md:inline-flex items-center rounded-full px-4 py-2 text-[0.82rem] font-normal transition-colors duration-200 ${
               compact ? "border border-soil/15 bg-white text-soil hover:border-soil" : btnGhost
             }`}
-            href="#events"
+            href="/#events"
           >
             Events
           </a>
-          <a className={compact ? `${btnDark} hidden md:inline-flex` : `${btnFill} hidden md:inline-flex`} href="#join">
-            Join the club
-          </a>
+          {!onJoin ? (
+            <a className={compact ? `${btnDark} hidden md:inline-flex` : `${btnFill} hidden md:inline-flex`} href="/join">
+              Join the club
+            </a>
+          ) : null}
           <button
             className={`border-0 p-2 md:hidden ${compact ? "rounded-full bg-white text-soil shadow-[0_8px_30px_rgba(65,51,51,0.1)]" : "bg-transparent text-inherit"}`}
             aria-label="Toggle navigation"

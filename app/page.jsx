@@ -223,7 +223,7 @@ export default function Home() {
             <p className="mx-auto mt-5 max-w-[38ch] text-[0.95rem] leading-[1.65] text-soil/80">
               Not another guest-lecture club. Not another dead group chat. Come find out what we actually are.
             </p>
-            <a className={`${btnDark} mt-8 inline-flex`} href="mailto:hello@neuraltech.club">
+            <a className={`${btnDark} mt-8 inline-flex`} href="/join">
               Join the club
               <svg className="ml-1" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

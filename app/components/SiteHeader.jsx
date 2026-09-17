@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { WHATSAPP_URL } from "@/lib/club-contact";
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 const btnFill =
@@ -108,8 +109,8 @@ export default function SiteHeader() {
             Events
           </a>
           {!onJoin ? (
-            <a className={compact ? `${btnDark} hidden md:inline-flex` : `${btnFill} hidden md:inline-flex`} href="/join">
-              Join the club
+            <a className={compact ? `${btnDark} hidden md:inline-flex` : `${btnFill} hidden md:inline-flex`} href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              Contact us
             </a>
           ) : null}
           <button

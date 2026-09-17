@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { saveRegistration } from "@/lib/save-registration";
 
+const CLOSED = true;
 const YEARS = new Set(["1st year", "2nd year", "3rd year", "4th year"]);
 const hits = new Map();
 
@@ -28,6 +29,13 @@ function clean(value, max = 200) {
 }
 
 export async function POST(request) {
+  if (CLOSED) {
+    return NextResponse.json(
+      { ok: false, error: "Registrations are closed. Contact us personally." },
+      { status: 410 },
+    );
+  }
+
   if (limited(clientIp(request))) {
     return NextResponse.json({ ok: false, error: "Too many tries. Wait a minute and send again." }, { status: 429 });
   }

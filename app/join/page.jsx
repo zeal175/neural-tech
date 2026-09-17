@@ -7,15 +7,15 @@ const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 const pad = "py-28 sm:py-36 md:py-44";
 
 export const metadata = {
-  title: "Join the club — Neural Tech",
-  description: "Register for Neural Tech. Show up curious. No portfolio required.",
+  title: "Join — Neural Tech",
+  description: "We’ve closed registrations. If you’re interested, contact us personally.",
 };
 
 export default function JoinPage() {
   return (
     <main id="top" className="relative isolate min-h-[100svh] bg-black text-cream">
       <div className="pointer-events-none fixed inset-0 z-0">
-        <HalftoneFlow className="h-full w-full" />
+        <HalftoneFlow className="h-full w-full" pauseOffscreen={false} />
       </div>
 
       <SiteHeader />

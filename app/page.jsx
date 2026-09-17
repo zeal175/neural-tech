@@ -5,6 +5,7 @@ import Reveal from "./components/Reveal";
 import LineReveal from "./components/LineReveal";
 import SiteHeader from "./components/SiteHeader";
 import UpcomingEvents from "./components/UpcomingEvents";
+import { WHATSAPP_URL } from "@/lib/club-contact";
 
 const ClubSleepMarquee = dynamic(() => import("./components/ClubSleepMarquee"), {
   loading: () => <div className="h-[280px] w-[280px] md:h-[600px] md:w-[600px]" aria-hidden />,
@@ -94,7 +95,7 @@ export default function Home() {
           </Reveal>
           <Reveal delay={3} className="mt-6 flex w-full flex-col items-center justify-center gap-2.5 sm:flex-row">
             <a className={btnFill} href="#join">
-              Join Neural Tech
+              Contact us
             </a>
             <a className={btnGhost} href="#events">
               See Tartarus
@@ -221,10 +222,10 @@ export default function Home() {
           <LineReveal as="h2" className={`${heroDisplay} mx-auto`} lines={["We promise", "nothing normal."]} />
           <Reveal delay={2}>
             <p className="mx-auto mt-5 max-w-[38ch] text-[0.95rem] leading-[1.65] text-soil/80">
-              Not another guest-lecture club. Not another dead group chat. Come find out what we actually are.
+              We’ve closed registrations. If you’re interested, contact us personally.
             </p>
-            <a className={`${btnDark} mt-8 inline-flex`} href="/join">
-              Join the club
+            <a className={`${btnDark} mt-8 inline-flex`} href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              Contact us
               <svg className="ml-1" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

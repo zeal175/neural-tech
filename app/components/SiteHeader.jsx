@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
+import { WHATSAPP_URL } from "@/lib/club-contact";
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 const btnFill =
@@ -13,16 +15,19 @@ const btnDark =
   "inline-flex items-center justify-center rounded-full bg-soil px-5 py-2.5 text-[0.84rem] font-normal text-cream transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98]";
 
 // Absolute hrefs so the header works on every page, not just the home page.
-// Desktop already shows an Events pill beside "Join the club", so this one only
+// Desktop already shows an Events pill beside "Contact us", so this one only
 // appears in the phone menu, where that pill is hidden.
 const navItems = [
   ["/#about", "About"],
   ["/#events", "Events", "md:hidden"],
   ["/gallery", "Archive"],
   ["/#community", "Community"],
+  ["/join", "Join"],
 ];
 
 export default function SiteHeader() {
+  const pathname = usePathname();
+  const onJoin = pathname === "/join";
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [onHero, setOnHero] = useState(true);
@@ -109,10 +114,13 @@ export default function SiteHeader() {
           >
             Events
           </a>
-          {/* The one CTA that stays in the bar at every width. */}
-          <a className={compact ? btnDark : btnFill} href="/#join">
-            Join the club
-          </a>
+          {/* The one CTA that stays in the bar at every width — except on /join, which
+              is itself the contact page. */}
+          {!onJoin ? (
+            <a className={compact ? btnDark : btnFill} href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+              Contact us
+            </a>
+          ) : null}
           <button
             className={`border-0 p-2 md:hidden ${compact ? "rounded-full bg-white text-soil shadow-[0_8px_30px_rgba(65,51,51,0.1)]" : "bg-transparent text-inherit"}`}
             aria-label="Toggle navigation"

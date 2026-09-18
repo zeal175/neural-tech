@@ -13,6 +13,9 @@ build/
 .env
 .env*.local
 
+# registration rows (open data/registrations.csv in Excel)
+data/registrations.csv
+
 # logs / debug
 npm-debug.log*
 yarn-debug.log*

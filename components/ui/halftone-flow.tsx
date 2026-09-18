@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 
 type EffectMode = "dark" | "light";
 
@@ -9,6 +9,7 @@ export type HalftoneFlowProps = {
   hue?: number;
   saturation?: number;
   brightness?: number;
+  pauseOffscreen?: boolean;
   className?: string;
   style?: CSSProperties;
 };
@@ -90,10 +91,12 @@ function HalftoneFlow({
   hue = 0,
   saturation = 1,
   brightness = 1,
+  pauseOffscreen = true,
   className,
   style,
 }: HalftoneFlowProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [gpuTicket, setGpuTicket] = useState(0);
   const safeMode: EffectMode = mode === "light" ? "light" : "dark";
   const safeHue = clamp(hue, -180, 180);
   const safeSaturation = clamp(saturation, 0, 2);
@@ -110,7 +113,7 @@ function HalftoneFlow({
     const gl = canvas.getContext("webgl", {
       alpha: false,
       antialias: false,
-      preserveDrawingBuffer: true,
+      powerPreference: "low-power",
     });
     if (!gl) return undefined;
 
@@ -144,18 +147,15 @@ function HalftoneFlow({
     const start = performance.now();
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const resize = () => {
-      const parent = canvas.parentElement;
-      const width = parent?.clientWidth || window.innerWidth;
-      const height = parent?.clientHeight || window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.max(1, Math.floor(width * dpr));
-      canvas.height = Math.max(1, Math.floor(height * dpr));
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      if (!running) draw(performance.now());
+    const onScreen = () => {
+      if (document.hidden) return false;
+      if (!pauseOffscreen) return true;
+      const box = canvas.getBoundingClientRect();
+      return box.width > 1 && box.height > 1 && box.bottom > 0 && box.top < window.innerHeight;
     };
 
     const draw = (now: number) => {
+      if (gl.isContextLost()) return;
       gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
       gl.uniform1f(timeLocation, (now - start) / 1000);
       gl.uniform1f(lightLocation, safeMode === "light" ? 1 : 0);
@@ -177,36 +177,66 @@ function HalftoneFlow({
     const stopLoop = () => {
       running = false;
       if (frame) window.cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    const sync = () => {
+      if (onScreen() && !reduce) startLoop();
+      else {
+        stopLoop();
+        draw(performance.now());
+      }
+    };
+
+    const resize = () => {
+      const parent = canvas.parentElement;
+      const width = parent?.clientWidth || window.innerWidth;
+      const height = parent?.clientHeight || window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(width * dpr));
+      canvas.height = Math.max(1, Math.floor(height * dpr));
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      sync();
     };
 
     resize();
-    draw(performance.now());
-    startLoop();
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) startLoop();
-        else stopLoop();
-      },
-      { rootMargin: "80px" },
-    );
-    observer.observe(canvas);
+    const observer = pauseOffscreen
+      ? new IntersectionObserver(() => sync(), { threshold: 0, rootMargin: "120px" })
+      : null;
+    observer?.observe(canvas);
 
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(canvas.parentElement || canvas);
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", sync);
+    if (pauseOffscreen) window.addEventListener("scroll", sync, { passive: true });
+
+    const onLost = (event: Event) => {
+      event.preventDefault();
+      stopLoop();
+    };
+    const onRestored = () => setGpuTicket((ticket) => ticket + 1);
+    canvas.addEventListener("webglcontextlost", onLost);
+    canvas.addEventListener("webglcontextrestored", onRestored);
 
     return () => {
-      observer.disconnect();
+      observer?.disconnect();
       resizeObserver.disconnect();
       window.removeEventListener("resize", resize);
+      document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("scroll", sync);
+      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextrestored", onRestored);
       stopLoop();
-      gl.deleteBuffer(positionBuffer);
-      gl.deleteProgram(program);
-      gl.deleteShader(vertexShader);
-      gl.deleteShader(fragmentShader);
+      if (!gl.isContextLost()) {
+        gl.deleteBuffer(positionBuffer);
+        gl.deleteProgram(program);
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
+      }
     };
-  }, [safeMode]);
+  }, [safeMode, pauseOffscreen, gpuTicket]);
 
   return (
     <canvas

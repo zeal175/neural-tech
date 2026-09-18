@@ -1,0 +1,684 @@
+/* Event gallery surfaces. Everything here is drawn from the --ev-* tokens an event's
+   theme supplies (see themes.js), so one event's page can be phosphor-on-black and the
+   next one warm paper without a line of per-event CSS. */
+
+.ev {
+  position: relative;
+  min-height: 100svh;
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  font-family: var(--ev-ui);
+}
+
+/* ---------- themed primitives ---------- */
+
+.ev-label {
+  margin: 0;
+  color: var(--ev-dim);
+  font-family: var(--ev-ui);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ev-display {
+  margin: 0;
+  color: var(--ev-accent);
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  line-height: 0.9;
+  letter-spacing: var(--ev-tracking, 0.02em);
+  text-transform: uppercase;
+}
+
+.ev-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  padding: 4px 9px;
+  color: var(--ev-accent-dim);
+  font-family: var(--ev-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.ev-cta,
+.ev-cta-ghost {
+  display: inline-flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 18px;
+  border: 1px solid var(--ev-accent);
+  border-radius: var(--ev-radius);
+  font-family: var(--ev-ui);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 200ms ease-out,
+    color 200ms ease-out,
+    border-color 200ms ease-out;
+}
+
+/* Colours are scoped under .ev on purpose: CRT events also carry the .tartarus class,
+   whose `.tartarus a { color: inherit }` outranks a lone class and turned the filled
+   button's black text pale grey — unreadable on the accent. */
+.ev .ev-cta {
+  background: var(--ev-accent);
+  color: var(--ev-accent-ink);
+}
+
+.ev .ev-cta:hover,
+.ev .ev-cta:focus-visible {
+  background: var(--ev-bg);
+  color: var(--ev-accent);
+  outline: none;
+}
+
+.ev .ev-cta-ghost {
+  border-color: var(--ev-line);
+  background: transparent;
+  color: var(--ev-ink);
+}
+
+.ev .ev-cta-ghost:hover,
+.ev .ev-cta-ghost:focus-visible {
+  border-color: var(--ev-accent);
+  background: var(--ev-accent);
+  color: var(--ev-accent-ink);
+  outline: none;
+}
+
+/* Compact size for header and footer bars. At this size the ghost variant's plain
+   --ev-line edge sinks into the bar and stops reading as a button, so it gets a
+   border mixed toward the accent. */
+.ev-btn-sm {
+  min-height: 36px;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  white-space: nowrap;
+}
+
+.ev-cta-ghost.ev-btn-sm {
+  border-color: color-mix(in srgb, var(--ev-accent) 50%, var(--ev-line));
+}
+
+@media (max-width: 480px) {
+  .ev-btn-sm {
+    padding: 0 10px;
+    letter-spacing: 0.08em;
+  }
+}
+
+.ev-pulse {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--ev-accent);
+  animation: ev-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes ev-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+
+/* ---------- wall ---------- */
+
+.g-wall {
+  column-count: 1;
+  column-gap: 12px;
+}
+
+@media (min-width: 620px) {
+  .g-wall {
+    column-count: 2;
+  }
+}
+
+@media (min-width: 1000px) {
+  .g-wall {
+    column-count: 3;
+  }
+}
+
+@media (min-width: 1440px) {
+  .g-wall {
+    column-count: 4;
+  }
+}
+
+/* Prints tossed on a table: each tile sits offset and askew (deterministic per index,
+   so server and client agree) and straightens as it rises up the viewport. --g-p is the
+   settle progress, written per tile by PhotoWall on scroll — so it scrubs both ways
+   instead of firing once. It defaults to 1 (settled), which is what no-JS and
+   reduced-motion viewers get. CSS scroll-driven timelines can't do this job here:
+   view() doesn't drive elements fragmented by a multicolumn container. */
+.t-seen.g-tile {
+  --g-p: 1;
+  position: relative;
+  display: block;
+  margin: 0 0 12px;
+  break-inside: avoid;
+  transform: translate3d(
+      calc(var(--g-dx, 0px) * (1 - var(--g-p))),
+      calc(var(--g-dy, 0px) * (1 - var(--g-p))),
+      0
+    )
+    rotate(calc(var(--g-rot, 0deg) * (1 - var(--g-p))));
+  transition: opacity 420ms ease-out var(--g-delay, 0ms);
+}
+
+/* The reveal clip sits on the frame, not on .g-tile: clipping the observed element to
+   nothing zeroes its intersection rect, so IntersectionObserver would never fire and
+   the tile would stay hidden forever. Negative insets keep the focus ring intact. */
+.g-frame {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  clip-path: inset(-6px -6px 100% -6px);
+  transition:
+    clip-path 760ms cubic-bezier(0.16, 1, 0.3, 1) var(--g-delay, 0ms),
+    border-color 300ms ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.g-tile.is-on .g-frame {
+  clip-path: inset(-6px);
+}
+
+.g-frame-box {
+  aspect-ratio: 4 / 5;
+}
+
+.g-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: saturate(0.6) contrast(1.06) brightness(0.93);
+  transition:
+    filter 420ms ease-out,
+    transform 760ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.g-frame-box img {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* halftone dust in the event's accent, same trick as .t-letter.is-decay */
+.g-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--ev-accent) 14%, transparent) 0.7px,
+    transparent 0.9px
+  );
+  background-size: 3px 3px;
+  mix-blend-mode: screen;
+  opacity: 0.4;
+  transition: opacity 420ms ease-out;
+}
+
+.g-tile:hover .g-frame,
+.g-tile:focus-within .g-frame,
+.g-tile.is-picked .g-frame {
+  border-color: var(--ev-accent);
+}
+
+.g-tile:hover .g-frame img,
+.g-tile:focus-within .g-frame img,
+.g-tile.is-picked .g-frame img {
+  filter: none;
+  transform: scale(1.04);
+}
+
+.g-tile:hover .g-frame::after,
+.g-tile:focus-within .g-frame::after {
+  opacity: 0.12;
+}
+
+.g-tile.is-picked .g-frame {
+  box-shadow: inset 0 0 0 2px var(--ev-accent);
+}
+
+.g-frame:focus-visible {
+  outline: 2px solid var(--ev-accent);
+  outline-offset: 2px;
+}
+
+.g-sweep {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -24%;
+  height: 24%;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--ev-accent) 38%, transparent),
+    transparent
+  );
+}
+
+.g-tile.is-on .g-sweep {
+  animation: g-sweep 820ms ease-out 1 both;
+  animation-delay: calc(var(--g-delay, 0ms) + 60ms);
+}
+
+@keyframes g-sweep {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(560%);
+    opacity: 0;
+  }
+}
+
+.g-index {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 3px 8px;
+  border-right: 1px solid var(--ev-line);
+  border-bottom: 1px solid var(--ev-line);
+  background: color-mix(in srgb, var(--ev-bg) 84%, transparent);
+  color: var(--ev-accent-dim);
+  font-family: var(--ev-ui);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  pointer-events: none;
+}
+
+.g-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 8px 10px;
+  border-top: 1px solid var(--ev-line);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--ev-bg) 95%, transparent),
+    color-mix(in srgb, var(--ev-bg) 72%, transparent)
+  );
+  color: var(--ev-ink);
+  text-align: left;
+  transform: translateY(101%);
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.g-tile:hover .g-cap,
+.g-tile:focus-within .g-cap {
+  transform: translateY(0);
+}
+
+.g-actions {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity 260ms ease-out,
+    transform 260ms ease-out;
+}
+
+.g-tile:hover .g-actions,
+.g-tile:focus-within .g-actions,
+.g-tile.is-picked .g-actions {
+  opacity: 1;
+  transform: none;
+}
+
+.g-act {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--ev-line);
+  border-top: 0;
+  border-right: 0;
+  background: color-mix(in srgb, var(--ev-bg) 88%, transparent);
+  color: var(--ev-ink);
+  font-family: var(--ev-ui);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    color 160ms ease-out;
+}
+
+.g-act:hover,
+.g-act:focus-visible,
+.g-act[aria-pressed="true"] {
+  background: var(--ev-accent);
+  color: var(--ev-accent-ink);
+  outline: none;
+}
+
+/* no hover to reveal on touch, so keep the controls out */
+@media (hover: none) {
+  .g-actions {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- pointer label ---------- */
+
+.g-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 44;
+  padding: 4px 9px;
+  border: 1px solid var(--ev-accent);
+  border-radius: var(--ev-radius);
+  background: color-mix(in srgb, var(--ev-bg) 90%, transparent);
+  color: var(--ev-accent);
+  font-family: var(--ev-ui);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+  will-change: transform;
+}
+
+.g-cursor.is-on {
+  opacity: 1;
+}
+
+/* ---------- selection tray ---------- */
+
+.g-tray {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 46;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ev-accent);
+  background: var(--ev-bg);
+  animation: g-tray-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes g-tray-in {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* ---------- empty state ---------- */
+
+.g-empty {
+  padding: 56px 20px;
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      color-mix(in srgb, var(--ev-line) 60%, transparent) 0 10px,
+      transparent 10px 20px
+    ),
+    var(--ev-surface);
+  text-align: center;
+}
+
+.g-caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1em;
+  margin-left: 0.3em;
+  background: var(--ev-accent);
+  vertical-align: text-bottom;
+  animation: g-caret 1.1s steps(1, end) infinite;
+}
+
+@keyframes g-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ---------- lightbox ---------- */
+
+.g-lb {
+  position: fixed;
+  inset: 0;
+  z-index: 48;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background: color-mix(in srgb, var(--ev-bg) 97%, transparent);
+  animation: g-lb-in 220ms ease-out both;
+}
+
+@keyframes g-lb-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.g-lb-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--ev-line);
+}
+
+.g-lb-foot {
+  border-top: 1px solid var(--ev-line);
+}
+
+.g-lb-stage {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  touch-action: pan-y;
+}
+
+.g-lb-shot {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--ev-radius);
+  animation: g-shot-in 300ms steps(2, end) both;
+}
+
+@keyframes g-shot-in {
+  0% {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  40% {
+    opacity: 1;
+    transform: translateX(-3px);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.g-lb-nav {
+  position: absolute;
+  top: 50%;
+  min-width: 46px;
+  min-height: 72px;
+  transform: translateY(-50%);
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: color-mix(in srgb, var(--ev-bg) 72%, transparent);
+  color: var(--ev-ink);
+  font-family: var(--ev-ui);
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition:
+    background-color 160ms ease-out,
+    color 160ms ease-out;
+}
+
+.g-lb-nav:hover,
+.g-lb-nav:focus-visible {
+  background: var(--ev-accent);
+  color: var(--ev-accent-ink);
+  outline: none;
+}
+
+.g-lb-prev {
+  left: 8px;
+}
+
+.g-lb-next {
+  right: 8px;
+}
+
+.g-strip {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 8px 10px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ev-line) transparent;
+}
+
+.g-strip-item {
+  flex: 0 0 auto;
+  width: 78px;
+  height: 54px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-surface);
+  cursor: pointer;
+}
+
+.g-strip-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.45) brightness(0.8);
+  transition: filter 200ms ease-out;
+}
+
+.g-strip-item[aria-current="true"] {
+  border-color: var(--ev-accent);
+}
+
+.g-strip-item[aria-current="true"] img,
+.g-strip-item:hover img {
+  filter: none;
+}
+
+.g-strip-item:focus-visible {
+  outline: 2px solid var(--ev-accent);
+  outline-offset: 1px;
+}
+
+.g-hidden-preload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-seen.g-tile {
+    --g-p: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .g-frame,
+  .g-tile.is-on .g-frame {
+    clip-path: none;
+    transition: none;
+  }
+
+  .g-tile.is-on .g-sweep,
+  .g-tray,
+  .g-lb,
+  .g-lb-shot,
+  .g-caret,
+  .ev-pulse {
+    animation: none;
+  }
+
+  .g-sweep,
+  .g-cursor {
+    display: none;
+  }
+
+  .g-frame img,
+  .g-cap,
+  .g-actions {
+    transition: none;
+  }
+}

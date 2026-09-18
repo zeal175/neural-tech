@@ -96,8 +96,8 @@ export default function Home() {
             <a className={btnFill} href="#join">
               Join Neural Tech
             </a>
-            <a className={btnGhost} href="#events">
-              See Tartarus
+            <a className={btnGhost} href="/gallery">
+              See the archive
             </a>
           </Reveal>
         </div>
@@ -262,6 +262,9 @@ export default function Home() {
               </a>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
+              <a className="transition-colors hover:text-blush" href="/gallery">
+                Event archive
+              </a>
               <a className="transition-colors hover:text-blush" href="/tartarus">
                 Tartarus briefing
               </a>

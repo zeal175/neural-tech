@@ -1,0 +1,274 @@
+/* The archive hub. Club theme (cream/soil/blush), but every row carries its event's
+   --ev-* tokens, so hovering one makes the row briefly become that event. */
+
+.ar-rows {
+  margin-top: 2.5rem;
+}
+
+.ar-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 20px 16px;
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-soil);
+  text-align: left;
+  transition:
+    background-color 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-row:last-child {
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* accent bar that wipes down the left edge on hover */
+.ar-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ev-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-link:hover,
+.ar-link:focus-visible {
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  border-color: var(--ev-line);
+  outline: none;
+}
+
+.ar-link:hover::before,
+.ar-link:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.ar-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: #fff;
+  transition:
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 380ms ease-out,
+    border-radius 380ms ease-out,
+    background-color 380ms ease-out;
+}
+
+.ar-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ar-link:hover .ar-mark,
+.ar-link:focus-visible .ar-mark {
+  transform: scale(1.06) rotate(-2deg);
+  border-color: var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-surface);
+}
+
+.ar-wordmark {
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  color: var(--ev-accent);
+}
+
+/* numeric line-height keeps the row height stable when the face swaps */
+.ar-title {
+  display: block;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-title,
+.ar-link:focus-visible .ar-title {
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  letter-spacing: var(--ev-tracking, 0.02em);
+  color: var(--ev-accent);
+}
+
+.ar-meta {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-meta,
+.ar-link:focus-visible .ar-meta {
+  color: var(--ev-dim);
+}
+
+.ar-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-go,
+.ar-link:focus-visible .ar-go {
+  color: var(--ev-accent);
+}
+
+.ar-go i {
+  font-style: normal;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-link:hover .ar-go i,
+.ar-link:focus-visible .ar-go i {
+  transform: translateX(6px);
+}
+
+.ar-sealed {
+  color: color-mix(in srgb, var(--color-soil) 45%, transparent);
+}
+
+.ar-sealed .ar-mark {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ar-sealed .ar-title {
+  color: color-mix(in srgb, var(--color-soil) 45%, transparent);
+}
+
+/* ---------- marquee hero ---------- */
+
+.ar-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transform: skewX(var(--mq-skew, 0deg));
+  transition: transform 260ms ease-out;
+}
+
+.ar-marquee[data-rolling="true"] {
+  height: 190px;
+}
+
+/* offset-path rotates elements to the path tangent by default; the chips read better
+   upright. The marquee writes offset-path inline on each item, whatever the nesting. */
+.ar-marquee div[style*="offset-path"] {
+  offset-rotate: 0deg;
+}
+
+.ar-marquee-static {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  padding: 2.5rem 0;
+}
+
+.ar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px 7px 7px;
+  border: 1px solid var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  white-space: nowrap;
+  box-shadow: 0 8px 26px rgba(65, 51, 51, 0.1);
+}
+
+.ar-chip img {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: calc(var(--ev-radius) * 0.6);
+}
+
+.ar-chip b {
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ev-accent);
+}
+
+.ar-chip span {
+  color: var(--ev-dim);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 520px) {
+  .ar-row {
+    grid-template-columns: 46px 1fr auto;
+    gap: 12px;
+    padding: 16px 10px;
+  }
+
+  .ar-mark {
+    width: 46px;
+    height: 46px;
+  }
+
+  .ar-title {
+    font-size: 1.35rem;
+  }
+
+  .ar-meta {
+    margin-top: 4px;
+    font-size: 0.78rem;
+  }
+
+  .ar-go {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-row,
+  .ar-row::before,
+  .ar-mark,
+  .ar-title,
+  .ar-meta,
+  .ar-go,
+  .ar-go i,
+  .ar-marquee {
+    transition: none;
+  }
+}

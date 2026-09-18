@@ -4,8 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Seen from "./Seen";
 import GlitchText from "./GlitchText";
 
-const REGISTER =
-  "https://docs.google.com/forms/d/e/1FAIpQLSceDR0va--1aH5XpcijE5qYIMaHXBjp-j7CCm64cASrUpPngQ/viewform";
+// The run is over, so every call to action now points at this event's photo gallery.
+const ARCHIVE = "/gallery/tartarus";
 
 const challenges = [
   {
@@ -212,22 +212,19 @@ export default function TartarusPage() {
           <a href="#rounds" onClick={() => setMenuOpen(false)} className="t-label transition-colors hover:text-[var(--t-phosphor)]">
             Challenges
           </a>
+          <a href="/gallery" onClick={() => setMenuOpen(false)} className="t-label transition-colors hover:text-[var(--t-phosphor)]">
+            Archive
+          </a>
           <div className="md:hidden">
-            <a
-              className="t-cta"
-              href={REGISTER}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setMenuOpen(false)}
-            >
-              Register
+            <a className="t-cta" href={ARCHIVE} onClick={() => setMenuOpen(false)}>
+              Photos
             </a>
           </div>
         </nav>
 
         <div className="relative z-50 hidden md:block">
-          <a className="t-cta" href={REGISTER} target="_blank" rel="noopener noreferrer">
-            Register
+          <a className="t-cta" href={ARCHIVE}>
+            Photos
           </a>
         </div>
 
@@ -240,6 +237,15 @@ export default function TartarusPage() {
           <span className="t-label">{menuOpen ? "Close" : "Menu"}</span>
         </button>
       </header>
+
+      <div className="relative z-30 mt-[56px] flex flex-wrap items-center justify-center gap-x-4 gap-y-1 border-y border-[var(--t-olive)] bg-[var(--t-depth)] px-5 py-2.5 text-center sm:mt-[60px]">
+        <p className="t-label m-0" style={{ color: "var(--t-amber)" }}>
+          Tartarus // run complete
+        </p>
+        <a className="t-label transition-colors hover:text-[var(--t-phosphor)]" href={ARCHIVE}>
+          Files recovered →
+        </a>
+      </div>
 
       <section id="top" className="relative isolate min-h-[100svh] overflow-hidden bg-[var(--t-void)]">
         <div className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center">
@@ -258,11 +264,11 @@ export default function TartarusPage() {
           </div>
         </div>
 
-        <div className="relative z-20 flex min-h-[100svh] flex-col items-center justify-between px-5 pt-[88px] pb-10 text-center sm:px-8 sm:pb-14 md:px-[6vw]">
+        <div className="relative z-20 flex min-h-[100svh] flex-col items-center justify-between px-5 pt-12 pb-10 text-center sm:px-8 sm:pb-14 md:px-[6vw]">
           <div>
             <p className="t-label mb-3 flex items-center justify-center gap-2 text-[var(--t-phosphor)] [text-shadow:0_0_18px_#030303]">
               <i className="t-pulse inline-block" aria-hidden="true" />
-              <GlitchText text="Neural Tech // live competition" interval={4000} />
+              <GlitchText text="Neural Tech // run complete" interval={4000} />
             </p>
             <GlitchText
               as="h1"
@@ -279,8 +285,8 @@ export default function TartarusPage() {
               text="The system fights back."
               interval={2500}
             />
-            <a className="t-cta mt-6" href={REGISTER} target="_blank" rel="noopener noreferrer">
-              Register your team
+            <a className="t-cta mt-6" href={ARCHIVE}>
+              See what survived
             </a>
           </div>
         </div>
@@ -338,22 +344,22 @@ export default function TartarusPage() {
         <ChallengeCarousel />
       </section>
 
-      <section id="join" className={`border-t border-[var(--t-olive)] ${pad} text-center`}>
+      <section id="after" className={`border-t border-[var(--t-olive)] ${pad} text-center`}>
         <Seen>
-          <GlitchText as="p" className="t-label" text="04 // Entry" interval={3800} />
+          <GlitchText as="p" className="t-label" text="04 // Aftermath" interval={3800} />
           <GlitchText
             as="h2"
             className="t-display mt-5 m-0 text-[clamp(2.4rem,7vw,4.6rem)]"
-            text="Bring a teammate. Or don’t."
+            text="It ran. It’s over. The files are up."
             interval={2300}
           />
           <GlitchText
             as="p"
-            className="mx-auto mt-8 max-w-[42ch] text-[1.1rem] leading-[1.7] text-[var(--t-ash)]"
-            text="Register the team. Two people max. Show up when the bay opens."
+            className="mx-auto mt-8 max-w-[44ch] text-[1.1rem] leading-[1.7] text-[var(--t-ash)]"
+            text="Sign-ups are closed. This page stays as the record of what the day was. The photos are in the archive — take any of them with you."
           />
-          <a className="t-cta mt-10" href={REGISTER} target="_blank" rel="noopener noreferrer">
-            Register on Google Forms
+          <a className="t-cta mt-10" href={ARCHIVE}>
+            Open the archive
           </a>
         </Seen>
       </section>

@@ -9,7 +9,7 @@ const vt323 = VT323({
 
 const title = "TARTARUS — Neural Tech";
 const description =
-  "One day. Four challenges. No safety net. Neural Tech’s live AI competition. Register your team.";
+  "One day. Four challenges. No safety net. The record of Neural Tech’s live AI competition — now complete, with the photos in the archive.";
 
 export const metadata = {
   title,

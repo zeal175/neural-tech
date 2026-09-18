@@ -250,16 +250,18 @@ export default function Home() {
             Built by students who got tired of waiting for someone else to build it.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-8 border-t border-cream/15 pt-8 text-[0.88rem] sm:grid-cols-3">
-            <p className="m-0 max-w-[28ch] text-cream/70">Humans building with machines. Bangalore.</p>
+            <p className="m-0 max-w-[36ch] text-cream/70">Humans building with machines. BSAR Crescent, Vandalur, Chennai.</p>
             <div className="flex flex-col gap-2">
               <a className="transition-colors hover:text-blush" href="mailto:hello@neuraltech.club">
                 Email
               </a>
-              <a className="transition-colors hover:text-blush" href="#">
+              <a
+                className="transition-colors hover:text-blush"
+                href="https://www.instagram.com/neural_techgenix_club/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Instagram
-              </a>
-              <a className="transition-colors hover:text-blush" href="#">
-                Discord
               </a>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">

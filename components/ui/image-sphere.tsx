@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 export interface Position3D {
@@ -356,9 +357,25 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
   const updateMomentumRef = useRef(updateMomentum);
   updateMomentumRef.current = updateMomentum;
 
+  const closeSpotlight = useCallback(() => setSelectedImage(null), []);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!selectedImage) return undefined;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeSpotlight();
+    };
+    document.addEventListener("keydown", onKey);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [selectedImage, closeSpotlight]);
 
   useEffect(() => {
     setImagePositions(generateSpherePositions());
@@ -468,12 +485,12 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
   );
 
   const renderSpotlightModal = () => {
-    if (!selectedImage) return null;
+    if (!selectedImage || !isMounted) return null;
 
-    return (
+    return createPortal(
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-soil/40 p-4"
-        onClick={() => setSelectedImage(null)}
+        className="fixed inset-0 z-[80] flex items-center justify-center bg-soil/40 p-4"
+        onClick={closeSpotlight}
         style={{ animation: "fadeIn 0.3s ease-out" }}
       >
         <div
@@ -484,8 +501,10 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
           <div className="relative aspect-square">
             <img src={selectedImage.src} alt={selectedImage.alt} className="h-full w-full object-cover" />
             <button
-              onClick={() => setSelectedImage(null)}
-              className="absolute top-2 right-2 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-soil/70 text-cream transition-all hover:bg-soil"
+              type="button"
+              aria-label="Close"
+              onClick={closeSpotlight}
+              className="absolute top-2 right-2 z-10 flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-soil/70 text-cream transition-all hover:bg-soil"
             >
               <X size={16} />
             </button>
@@ -497,7 +516,8 @@ const SphereImageGrid: React.FC<SphereImageGridProps> = ({
             </div>
           )}
         </div>
-      </div>
+      </div>,
+      document.body,
     );
   };
 

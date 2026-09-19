@@ -1,6 +1,5 @@
-// Completed events, newest first. Each one gets its own themed gallery page at
-// /gallery/<slug>, and its photos live in public/gallery/<slug>/ — see photos.js.
-// Blank fields are omitted by the UI, so leave a value empty until you know it.
+// Completed events, newest first. Each one with photos gets a gallery at
+// /gallery/<slug>. Blank fields are omitted by the UI.
 
 import { themes } from "./themes";
 
@@ -9,16 +8,26 @@ export const events = [
     slug: "tartarus",
     title: "TARTARUS",
     kicker: "Live AI competition",
-    date: "", // "2026-09-13" renders as 13 SEP 2026
-    mark: "/gallery/logos/tartarus.png", // falls back to the wordmark if missing
+    date: "",
+    time: "",
+    venue: "BSAR Crescent, Vandalur",
+    mark: "/gallery/logos/tartarus.png",
     markAlt: "The Tartarus pixel figure",
+    featured: true,
+    short: "Tartarus",
+    cover: "/gallery/tartarus/DSC01597.jpg",
+    coverWidth: 3376,
+    coverHeight: 6000,
     blurb:
-      "One day inside a hostile system. Teams talked past a sentry that hated the word “key,” named what the archive was hiding, and repaired four machines somebody broke on purpose. Core opened for the ones still standing.",
-    tags: ["AI", "live competition", "eliminations"],
-    stats: [
-      // { label: "Teams", value: "24" },
-      // { label: "Survived to Core", value: "06" },
+      "Not a hackathon, not a workshop. One day inside a hostile system. Teams descend through four layers while Talos watches. You play in pairs: one person sees what the other can’t.\n\nMistakes cost you. Signal Traps lock players until OPS clears them. Points are earned under pressure, on a shared clock, in the room — not on a take-home brief.",
+    beats: [
+      "Crack the Archive and talk your way past the gate.",
+      "Solve vault riddles under Eyes/Hands handicap.",
+      "Judge GLIA’s outputs as Witness and Analyst.",
+      "Finish in the Core, where Signal and Impulse synthesize everything that came before.",
     ],
+    tags: ["AI", "live competition", "penalties"],
+    stats: [],
     briefingHref: "/tartarus",
     theme: themes.crt,
   },

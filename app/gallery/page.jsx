@@ -29,10 +29,12 @@ function pad(value, width = 2) {
 }
 
 export default function ArchiveHub() {
-  const rows = events.map((event) => ({
-    ...event,
-    count: listPhotoFiles(event.slug).length,
-  }));
+  const rows = events
+    .map((event) => ({
+      ...event,
+      count: listPhotoFiles(event.slug).length,
+    }))
+    .filter((event) => event.count > 0);
 
   const photos = rows.flatMap((event) =>
     readPhotos(event.slug, event.title).map((photo) => ({

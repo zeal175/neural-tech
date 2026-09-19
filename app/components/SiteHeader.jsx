@@ -7,21 +7,12 @@ import { Menu, X } from "lucide-react";
 import { WHATSAPP_URL } from "@/lib/club-contact";
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
-const btnFill =
-  "inline-flex items-center justify-center rounded-full bg-cream px-5 py-2.5 text-[0.84rem] font-normal text-soil transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white active:scale-[0.98]";
-const btnGhost =
-  "inline-flex items-center justify-center rounded-full border border-cream/80 px-5 py-2.5 text-[0.84rem] font-normal text-cream transition-[transform,background-color,color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-cream hover:text-soil active:scale-[0.98]";
-const btnDark =
-  "inline-flex items-center justify-center rounded-full bg-soil px-5 py-2.5 text-[0.84rem] font-normal text-cream transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98]";
 
 // Absolute hrefs so the header works on every page, not just the home page.
-// Desktop already shows an Events pill beside "Contact us", so this one only
-// appears in the phone menu, where that pill is hidden.
 const navItems = [
   ["/#about", "About"],
-  ["/events", "Events", "md:hidden"],
-  ["/gallery", "Archive"],
-  ["/#community", "Community"],
+  ["/gallery", "Gallery"],
+  ["/events", "Events"],
   ["/join", "Join"],
 ];
 
@@ -90,12 +81,12 @@ export default function SiteHeader() {
             } absolute inset-x-4 top-[4.25rem] flex-col gap-4 rounded-2xl bg-white px-5 py-6 text-soil shadow-[0_12px_40px_rgba(65,51,51,0.12)] md:static md:ml-5 md:flex md:flex-row md:items-center md:gap-6 md:bg-transparent md:p-0 md:shadow-none md:text-inherit`}
             aria-label="Main navigation"
           >
-            {navItems.map(([href, label, only = ""]) => (
+            {navItems.map(([href, label]) => (
               <a
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className={`${only} text-[0.88rem] font-normal transition-colors duration-200 ${menuOpen ? "text-soil/70 hover:text-soil" : navLink}`}
+                className={`text-[0.88rem] font-normal transition-colors duration-200 ${menuOpen ? "text-soil/70 hover:text-soil" : navLink}`}
               >
                 {label}
               </a>
@@ -121,17 +112,6 @@ export default function SiteHeader() {
         </div>
 
         <div className="relative z-50 flex shrink-0 items-center gap-2">
-          {/* Desktop Events pill. On phones it lives in the menu instead. */}
-          <a
-            className={`hidden md:inline-flex items-center rounded-full px-4 py-2 text-[0.82rem] font-normal transition-colors duration-200 ${
-              compact
-                ? "border border-soil/15 bg-white text-soil hover:border-soil"
-                : "border border-cream/80 text-cream hover:bg-cream hover:text-soil"
-            }`}
-            href="/events"
-          >
-            Events
-          </a>
           {!onJoin ? (
             <a
               className={`hidden md:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[0.84rem] font-normal transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98] ${

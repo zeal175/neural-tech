@@ -14,14 +14,14 @@ export default function UpcomingEvents() {
       <HalftoneFlow className="absolute inset-0 h-full w-full" />
 
       <div className={`relative z-10 ${wrap} text-center`}>
-        <LineReveal className={`${spotlight} text-cream`} lines={["One day.", "No safety net."]} />
+        <LineReveal className={`${spotlight} text-cream`} lines={["Days we", "actually ran."]} />
+
         <Reveal delay={2}>
-          <p className="mx-auto mt-5 max-w-[42ch] text-[0.92rem] leading-[1.6] text-cream/70">
-            Tartarus isn’t a hackathon. It’s a full day of AI-themed events, live eliminations, and a debug room that
-            gets meaner with every mistake. No entry fee. Real cash prize. Talo’s is watching, and it doesn’t go easy.
+          <p className="mx-auto mt-5 max-w-[38ch] text-[0.92rem] leading-[1.6] text-cream/70">
+            Every event the club has put on. Not a calendar of maybes — the ones that happened.
           </p>
-          <a className={`${btnFill} mt-6`} href="/tartarus">
-            See Tartarus
+          <a className={`${btnFill} mt-7`} href="/events">
+            See the events
             <svg className="ml-1" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>

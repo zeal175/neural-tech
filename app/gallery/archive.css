@@ -1,0 +1,282 @@
+/* The archive hub. Club theme (cream/soil/blush), but every row carries its event's
+   --ev-* tokens, so hovering one makes the row briefly become that event. */
+
+.ar-rows {
+  margin-top: 0;
+}
+
+.ar-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  padding: 20px 16px;
+  border: 0;
+  border-top: 1px solid var(--color-line);
+  background: transparent;
+  color: var(--color-soil);
+  text-align: left;
+  transition:
+    background-color 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-row:last-child {
+  border-bottom: 1px solid var(--color-line);
+}
+
+/* accent bar that wipes down the left edge on hover */
+.ar-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ev-accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* CRT scan that only shows when the event look takes over */
+.ar-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    color-mix(in srgb, var(--ev-accent) 7%, transparent) 2px 4px
+  );
+  transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-link:hover,
+.ar-link:focus-visible {
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  border-color: var(--ev-line);
+  outline: none;
+}
+
+.ar-link:hover::before,
+.ar-link:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.ar-link:hover::after,
+.ar-link:focus-visible::after {
+  opacity: 1;
+}
+
+.ar-mark {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  background: #fff;
+  transition:
+    transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 380ms ease-out,
+    border-radius 380ms ease-out,
+    background-color 380ms ease-out;
+}
+
+.ar-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ar-link:hover .ar-mark,
+.ar-link:focus-visible .ar-mark {
+  transform: scale(1.06) rotate(-2deg);
+  border-color: var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-surface);
+}
+
+.ar-wordmark {
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  font-size: 1.35rem;
+  letter-spacing: 0.06em;
+  color: var(--ev-accent);
+}
+
+/* numeric line-height keeps the row height stable when the face swaps */
+.ar-title {
+  display: block;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.55rem, 4vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-title,
+.ar-link:focus-visible .ar-title {
+  font-family: var(--ev-display);
+  font-weight: var(--ev-display-weight, 400);
+  letter-spacing: var(--ev-tracking, 0.02em);
+  color: var(--ev-accent);
+}
+
+.ar-row > span {
+  min-width: 0;
+}
+
+.ar-meta {
+  display: block;
+  margin-top: 6px;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-meta,
+.ar-link:focus-visible .ar-meta {
+  color: var(--ev-dim);
+}
+
+.ar-go {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-muted);
+  font-size: 0.76rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: color 380ms ease-out;
+}
+
+.ar-link:hover .ar-go,
+.ar-link:focus-visible .ar-go {
+  color: var(--ev-accent);
+}
+
+.ar-go i {
+  font-style: normal;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ar-link:hover .ar-go i,
+.ar-link:focus-visible .ar-go i {
+  transform: translateX(6px);
+}
+
+.ar-sealed {
+  color: color-mix(in srgb, var(--color-soil) 45%, transparent);
+}
+
+.ar-sealed .ar-mark {
+  border-style: dashed;
+  background: transparent;
+}
+
+.ar-sealed .ar-title {
+  color: color-mix(in srgb, var(--color-soil) 45%, transparent);
+}
+
+/* ---------- photo reel ---------- */
+
+.ar-film {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  height: 190px;
+  --ar-shot-h: 150px;
+}
+
+.ar-film-track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  will-change: transform;
+}
+
+.ar-film-set {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding-right: 12px;
+}
+
+.ar-film-shot {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  height: var(--ar-shot-h, 150px);
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+@media (max-width: 640px) {
+  .ar-row {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 12px;
+    padding: 16px 4px;
+  }
+
+  .ar-mark {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+  }
+
+  .ar-title {
+    font-size: 1.28rem;
+  }
+
+  .ar-meta {
+    margin-top: 4px;
+    font-size: 0.76rem;
+  }
+
+  .ar-go {
+    display: none;
+  }
+
+  .ar-film {
+    height: 136px;
+    --ar-shot-h: 108px;
+  }
+
+  .ar-film-shot {
+    border-radius: 12px;
+  }
+
+  .ar-film-set {
+    gap: 8px;
+    padding-right: 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-row,
+  .ar-row::before,
+  .ar-mark,
+  .ar-title,
+  .ar-meta,
+  .ar-go,
+  .ar-go i {
+    transition: none;
+  }
+}

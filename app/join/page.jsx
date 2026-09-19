@@ -42,7 +42,9 @@ export default function JoinPage() {
             Built by students who got tired of waiting for someone else to build it.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-8 border-t border-cream/15 pt-8 text-[0.88rem] sm:grid-cols-3">
-            <p className="m-0 max-w-[36ch] text-cream/70">Humans building with machines. BSAR Crescent, Vandalur, Chennai.</p>
+            <p className="m-0 max-w-[36ch] text-cream/70">
+              Humans building with machines. BSAR Crescent Institute of Science and Technology, Vandalur.
+            </p>
             <div className="flex flex-col gap-2">
               <a className="transition-colors hover:text-blush" href="mailto:hello@neuraltech.club">
                 Email
@@ -57,6 +59,12 @@ export default function JoinPage() {
               </a>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
+              <a className="transition-colors hover:text-blush" href="/events">
+                Events
+              </a>
+              <a className="transition-colors hover:text-blush" href="/gallery">
+                Event archive
+              </a>
               <a className="transition-colors hover:text-blush" href="/tartarus">
                 Tartarus briefing
               </a>

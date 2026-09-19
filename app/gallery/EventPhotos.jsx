@@ -70,7 +70,7 @@ function useColumnCount() {
   useEffect(() => {
     const update = () => {
       const width = window.innerWidth;
-      setCount(width >= 1100 ? 4 : width >= 800 ? 3 : width >= 560 ? 2 : 1);
+      setCount(width >= 1100 ? 4 : width >= 800 ? 3 : 2);
     };
     update();
     window.addEventListener("resize", update);
@@ -109,7 +109,7 @@ export default function EventPhotos({ photos = [] }) {
 
   return (
     <Gallery>
-      <div className="flex items-start gap-3 sm:gap-4">
+      <div className="flex items-start gap-1.5 sm:gap-2">
         {columns.map((column, index) => (
           <div
             key={index}

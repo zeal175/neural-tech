@@ -27,7 +27,7 @@ export default async function EventGalleryPage({ params }) {
 
       <h1 className="sr-only">{event.title} photos</h1>
 
-      <section className="px-4 pt-[108px] pb-24 sm:px-5 sm:pt-[120px] sm:pb-32">
+      <section className="px-2.5 pt-[96px] pb-16 sm:px-5 sm:pt-[120px] sm:pb-32">
         <div className="mx-auto w-full max-w-[1320px]">
           <EventPhotos photos={photos} />
         </div>

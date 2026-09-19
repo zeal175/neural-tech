@@ -8,7 +8,7 @@
 .ar-row {
   position: relative;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
   width: 100%;
@@ -135,12 +135,17 @@
   color: var(--ev-accent);
 }
 
+.ar-row > span {
+  min-width: 0;
+}
+
 .ar-meta {
   display: block;
   margin-top: 6px;
   color: var(--color-muted);
   font-size: 0.85rem;
   line-height: 1.4;
+  overflow-wrap: anywhere;
   transition: color 380ms ease-out;
 }
 
@@ -191,66 +196,76 @@
 
 /* ---------- photo reel ---------- */
 
-@keyframes ar-film {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 .ar-film {
   position: relative;
   width: 100%;
   overflow: hidden;
   height: 190px;
+  --ar-shot-h: 150px;
 }
 
 .ar-film-track {
   display: flex;
-  align-items: center;
-  gap: 12px;
   width: max-content;
   height: 100%;
-  padding-inline: 12px;
-  animation: ar-film 48s linear infinite;
   will-change: transform;
+}
+
+.ar-film-set {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding-right: 12px;
 }
 
 .ar-film-shot {
   position: relative;
   display: block;
   flex: 0 0 auto;
-  height: 150px;
+  height: var(--ar-shot-h, 150px);
   overflow: hidden;
   border-radius: 14px;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 640px) {
   .ar-row {
-    grid-template-columns: 46px 1fr auto;
+    grid-template-columns: 46px minmax(0, 1fr);
     gap: 12px;
-    padding: 16px 10px;
+    padding: 16px 4px;
   }
 
   .ar-mark {
     width: 46px;
     height: 46px;
+    border-radius: 12px;
   }
 
   .ar-title {
-    font-size: 1.35rem;
+    font-size: 1.28rem;
   }
 
   .ar-meta {
     margin-top: 4px;
-    font-size: 0.78rem;
+    font-size: 0.76rem;
   }
 
   .ar-go {
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
+    display: none;
+  }
+
+  .ar-film {
+    height: 136px;
+    --ar-shot-h: 108px;
+  }
+
+  .ar-film-shot {
+    border-radius: 12px;
+  }
+
+  .ar-film-set {
+    gap: 8px;
+    padding-right: 8px;
   }
 }
 
@@ -261,12 +276,7 @@
   .ar-title,
   .ar-meta,
   .ar-go,
-  .ar-go i,
-  .ar-film-track {
+  .ar-go i {
     transition: none;
-  }
-
-  .ar-film-track {
-    animation: none;
   }
 }

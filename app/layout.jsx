@@ -20,6 +20,10 @@ const title = "Neural Tech — Not Your Average Tech Club";
 const description =
   "A community of curious minds exploring AI, emerging technology, and the ideas shaping tomorrow.";
 
+export const viewport = {
+  viewportFit: "cover",
+};
+
 export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://neuraltech.club"),
   title,

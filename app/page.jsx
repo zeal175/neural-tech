@@ -5,6 +5,7 @@ import Reveal from "./components/Reveal";
 import LineReveal from "./components/LineReveal";
 import SiteHeader from "./components/SiteHeader";
 import UpcomingEvents from "./components/UpcomingEvents";
+import CommunityArchiveHit from "./components/CommunityArchiveHit";
 import { WHATSAPP_URL } from "@/lib/club-contact";
 
 const ClubSleepMarquee = dynamic(() => import("./components/ClubSleepMarquee"), {
@@ -171,19 +172,19 @@ export default function Home() {
       </div>
 
       <section id="community" className="relative overflow-x-clip bg-cream">
-        <div className="relative min-h-[620px] w-full md:min-h-[800px]">
+        <CommunityArchiveHit>
           <div className="pointer-events-auto absolute inset-0 z-0 flex items-center justify-center">
             <ClubSleepMarquee />
           </div>
           <div className="pointer-events-none relative z-10 mx-auto grid min-h-[620px] max-w-[1240px] grid-cols-2 grid-rows-[auto_1fr_auto] px-5 py-24 sm:px-8 md:min-h-[800px] md:px-10 md:py-32">
-            <LineReveal className={`${spotlight} col-start-1 row-start-1`} lines={["A club"]} />
+            <LineReveal className={`${spotlight} col-start-1 row-start-1`} lines={[<span className="whitespace-nowrap">A club that</span>]} />
             <LineReveal
               className={`${spotlight} col-start-2 row-start-3 justify-self-end text-right`}
               delay={80}
               lines={["Never sleeps"]}
             />
           </div>
-        </div>
+        </CommunityArchiveHit>
         <div className={`${wrap} pt-16 pb-28 sm:pt-20 sm:pb-36 md:pt-24 md:pb-44`}>
           <div className="grid grid-cols-1 items-start gap-8 md:grid-cols-2 md:gap-12">
             <LineReveal className={display} lines={["Not a Discord", "server that died", "in week two."]} />
@@ -250,19 +251,26 @@ export default function Home() {
             Built by students who got tired of waiting for someone else to build it.
           </p>
           <div className="mt-10 grid grid-cols-1 gap-8 border-t border-cream/15 pt-8 text-[0.88rem] sm:grid-cols-3">
-            <p className="m-0 max-w-[28ch] text-cream/70">Humans building with machines. Bangalore.</p>
+            <p className="m-0 max-w-[36ch] text-cream/70">
+              Humans building with machines. BSAR Crescent Institute of Science and Technology, Vandalur.
+            </p>
             <div className="flex flex-col gap-2">
               <a className="transition-colors hover:text-blush" href="mailto:hello@neuraltech.club">
                 Email
               </a>
-              <a className="transition-colors hover:text-blush" href="#">
+              <a
+                className="transition-colors hover:text-blush"
+                href="https://www.instagram.com/neural_techgenix_club/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 Instagram
-              </a>
-              <a className="transition-colors hover:text-blush" href="#">
-                Discord
               </a>
             </div>
             <div className="flex flex-col gap-2 sm:items-end">
+              <a className="transition-colors hover:text-blush" href="/events">
+                Events
+              </a>
               <a className="transition-colors hover:text-blush" href="/gallery">
                 Event archive
               </a>

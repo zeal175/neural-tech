@@ -19,7 +19,7 @@ const btnDark =
 // appears in the phone menu, where that pill is hidden.
 const navItems = [
   ["/#about", "About"],
-  ["/#events", "Events", "md:hidden"],
+  ["/events", "Events", "md:hidden"],
   ["/gallery", "Archive"],
   ["/#community", "Community"],
   ["/join", "Join"],
@@ -28,7 +28,7 @@ const navItems = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const onJoin = pathname === "/join";
-  const onArchive = pathname.startsWith("/gallery");
+  const onCream = pathname.startsWith("/gallery") || pathname.startsWith("/events");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [onHero, setOnHero] = useState(true);
@@ -66,7 +66,7 @@ export default function SiteHeader() {
     };
   }, []);
 
-  const compact = scrolled || !onHero || onArchive;
+  const compact = scrolled || !onHero || onCream;
   const navLink = compact || menuOpen ? "text-soil/70 hover:text-soil" : "text-cream/80 hover:text-cream";
 
   return (
@@ -77,8 +77,8 @@ export default function SiteHeader() {
         }`}
       >
         <div
-          className={`flex items-center transition-[background-color,box-shadow,padding,border-radius] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            compact ? "rounded-full bg-white py-1.5 pl-2.5 pr-2 shadow-[0_8px_30px_rgba(65,51,51,0.1)] md:pr-5" : ""
+          className={`flex min-w-0 items-center transition-[background-color,box-shadow,padding,border-radius] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            compact ? "rounded-full bg-white py-1.5 pl-2.5 pr-1.5 shadow-[0_8px_30px_rgba(65,51,51,0.1)] md:pr-5" : ""
           }`}
         >
           <a className="relative z-50 flex shrink-0 items-center" href="/#top" aria-label="Neural Tech home">
@@ -100,36 +100,50 @@ export default function SiteHeader() {
                 {label}
               </a>
             ))}
-          </nav>
-        </div>
-
-        <div className="relative z-50 flex items-center gap-2">
-          {/* max-md:hidden, not `hidden md:inline-flex`: btnGhost carries its own
-              inline-flex, which beat `hidden` and left this pill showing on phones. On
-              phones, Events lives in the menu instead. */}
-          <a
-            className={`inline-flex max-md:hidden items-center rounded-full px-4 py-2 text-[0.82rem] font-normal transition-colors duration-200 ${
-              compact ? "border border-soil/15 bg-white text-soil hover:border-soil" : btnGhost
-            }`}
-            href="/#events"
-          >
-            Events
-          </a>
-          {/* The one CTA that stays in the bar at every width — except on /join, which
-              is itself the contact page. */}
-          {!onJoin ? (
-            <a className={compact ? btnDark : btnFill} href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
+            <a
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMenuOpen(false)}
+              className={`md:hidden text-[0.88rem] font-normal transition-colors duration-200 ${menuOpen ? "text-soil/70 hover:text-soil" : navLink}`}
+            >
               Contact us
             </a>
-          ) : null}
+          </nav>
           <button
-            className={`border-0 p-2 md:hidden ${compact ? "rounded-full bg-white text-soil shadow-[0_8px_30px_rgba(65,51,51,0.1)]" : "bg-transparent text-inherit"}`}
+            className={`relative z-50 ml-0.5 shrink-0 border-0 p-2 md:hidden ${compact ? "rounded-full text-soil" : "bg-transparent text-inherit"}`}
             aria-label="Toggle navigation"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((open) => !open)}
           >
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+        </div>
+
+        <div className="relative z-50 flex shrink-0 items-center gap-2">
+          {/* Desktop Events pill. On phones it lives in the menu instead. */}
+          <a
+            className={`hidden md:inline-flex items-center rounded-full px-4 py-2 text-[0.82rem] font-normal transition-colors duration-200 ${
+              compact
+                ? "border border-soil/15 bg-white text-soil hover:border-soil"
+                : "border border-cream/80 text-cream hover:bg-cream hover:text-soil"
+            }`}
+            href="/events"
+          >
+            Events
+          </a>
+          {!onJoin ? (
+            <a
+              className={`hidden md:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[0.84rem] font-normal transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98] ${
+                compact ? "bg-soil text-cream" : "bg-cream text-soil hover:bg-white"
+              }`}
+              href={WHATSAPP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Contact us
+            </a>
+          ) : null}
         </div>
       </div>
     </header>

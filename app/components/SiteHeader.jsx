@@ -28,6 +28,7 @@ const navItems = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const onJoin = pathname === "/join";
+  const onArchive = pathname.startsWith("/gallery");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [onHero, setOnHero] = useState(true);
@@ -65,7 +66,7 @@ export default function SiteHeader() {
     };
   }, []);
 
-  const compact = scrolled || !onHero;
+  const compact = scrolled || !onHero || onArchive;
   const navLink = compact || menuOpen ? "text-soil/70 hover:text-soil" : "text-cream/80 hover:text-cream";
 
   return (

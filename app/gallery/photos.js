@@ -103,14 +103,48 @@ function webpSize(buffer) {
   return null;
 }
 
+function jpegOrientation(buffer) {
+  if (buffer.length < 12 || buffer.readUInt16BE(0) !== 0xffd8) return 1;
+  let offset = 2;
+  while (offset + 8 < buffer.length) {
+    if (buffer[offset] !== 0xff) break;
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+    if (marker === 0xe1) {
+      const start = offset + 4;
+      if (buffer.toString("ascii", start, start + 4) !== "Exif") return 1;
+      const tiff = start + 6;
+      const little = buffer.toString("ascii", tiff, tiff + 2) === "II";
+      const u16 = (at) => (little ? buffer.readUInt16LE(at) : buffer.readUInt16BE(at));
+      const u32 = (at) => (little ? buffer.readUInt32LE(at) : buffer.readUInt32BE(at));
+      const ifd0 = tiff + u32(tiff + 4);
+      if (ifd0 + 2 > buffer.length) return 1;
+      const count = u16(ifd0);
+      for (let i = 0; i < count; i++) {
+        const entry = ifd0 + 2 + i * 12;
+        if (entry + 12 > buffer.length) break;
+        if (u16(entry) === 0x0112) return u16(entry + 8) || 1;
+      }
+      return 1;
+    }
+    if (marker === 0xda) break;
+    if (length < 2) break;
+    offset += 2 + length;
+  }
+  return 1;
+}
+
 function readDimensions(file) {
   try {
     const buffer = readHead(file);
     const size = pngSize(buffer) || jpegSize(buffer) || webpSize(buffer) || gifSize(buffer);
     if (!size || !size.width || !size.height) return { width: null, height: null };
+    const orientation = jpegOrientation(buffer);
+    if (orientation >= 5 && orientation <= 8) {
+      return { width: size.height, height: size.width };
+    }
     return size;
   } catch {
-    // AVIF and anything exotic land here; the tile falls back to a fixed box.
     return { width: null, height: null };
   }
 }
@@ -158,7 +192,7 @@ export function readPhotos(slug, label = "") {
 
     return {
       file,
-      src: `/gallery/${slug}/${encodeURIComponent(file)}`,
+      src: `/gallery/${slug}/${file}`,
       caption,
       alt,
       width,

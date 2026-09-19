@@ -2,7 +2,7 @@
    --ev-* tokens, so hovering one makes the row briefly become that event. */
 
 .ar-rows {
-  margin-top: 2.5rem;
+  margin-top: 0;
 }
 
 .ar-row {
@@ -42,6 +42,21 @@
   transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* CRT scan that only shows when the event look takes over */
+.ar-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    color-mix(in srgb, var(--ev-accent) 7%, transparent) 2px 4px
+  );
+  transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .ar-link:hover,
 .ar-link:focus-visible {
   background: var(--ev-bg);
@@ -53,6 +68,11 @@
 .ar-link:hover::before,
 .ar-link:focus-visible::before {
   transform: scaleY(1);
+}
+
+.ar-link:hover::after,
+.ar-link:focus-visible::after {
+  opacity: 1;
 }
 
 .ar-mark {
@@ -169,68 +189,42 @@
   color: color-mix(in srgb, var(--color-soil) 45%, transparent);
 }
 
-/* ---------- marquee hero ---------- */
+/* ---------- photo reel ---------- */
 
-.ar-marquee {
+@keyframes ar-film {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ar-film {
   position: relative;
   width: 100%;
   overflow: hidden;
-  transform: skewX(var(--mq-skew, 0deg));
-  transition: transform 260ms ease-out;
-}
-
-.ar-marquee[data-rolling="true"] {
   height: 190px;
 }
 
-/* offset-path rotates elements to the path tangent by default; the chips read better
-   upright. The marquee writes offset-path inline on each item, whatever the nesting. */
-.ar-marquee div[style*="offset-path"] {
-  offset-rotate: 0deg;
-}
-
-.ar-marquee-static {
+.ar-film-track {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-  padding: 2.5rem 0;
-}
-
-.ar-chip {
-  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 7px 14px 7px 7px;
-  border: 1px solid var(--ev-line);
-  border-radius: var(--ev-radius);
-  background: var(--ev-bg);
-  color: var(--ev-ink);
-  white-space: nowrap;
-  box-shadow: 0 8px 26px rgba(65, 51, 51, 0.1);
+  gap: 12px;
+  width: max-content;
+  height: 100%;
+  padding-inline: 12px;
+  animation: ar-film 48s linear infinite;
+  will-change: transform;
 }
 
-.ar-chip img {
-  width: 34px;
-  height: 34px;
-  object-fit: cover;
-  border-radius: calc(var(--ev-radius) * 0.6);
-}
-
-.ar-chip b {
-  font-family: var(--ev-display);
-  font-weight: var(--ev-display-weight, 400);
-  font-size: 1.05rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ev-accent);
-}
-
-.ar-chip span {
-  color: var(--ev-dim);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.ar-film-shot {
+  position: relative;
+  display: block;
+  flex: 0 0 auto;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 14px;
 }
 
 @media (max-width: 520px) {
@@ -268,7 +262,11 @@
   .ar-meta,
   .ar-go,
   .ar-go i,
-  .ar-marquee {
+  .ar-film-track {
     transition: none;
+  }
+
+  .ar-film-track {
+    animation: none;
   }
 }

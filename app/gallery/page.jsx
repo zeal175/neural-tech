@@ -5,7 +5,7 @@ import Reveal from "../components/Reveal";
 import LineReveal from "../components/LineReveal";
 import MarqueeHero from "./MarqueeHero";
 import { events, formatEventDate } from "./events";
-import { listPhotoFiles } from "./photos";
+import { listPhotoFiles, readPhotos } from "./photos";
 import { allFontClasses } from "./fonts";
 import "./archive.css";
 
@@ -33,47 +33,34 @@ export default function ArchiveHub() {
     ...event,
     count: listPhotoFiles(event.slug).length,
   }));
-  const totalPhotos = rows.reduce((sum, event) => sum + event.count, 0);
 
-  const marqueeItems = rows.map((event) => ({
-    title: event.title,
-    mark: event.mark,
-    tag: event.kicker || "event",
-    tokens: event.theme.tokens,
-  }));
+  const photos = rows.flatMap((event) =>
+    readPhotos(event.slug, event.title).map((photo) => ({
+      src: photo.src,
+      href: `/gallery/${event.slug}`,
+      width: photo.width,
+      height: photo.height,
+    })),
+  );
 
   return (
     <main className={`${allFontClasses} bg-cream text-soil`}>
       <SiteHeader />
 
-      <section className="px-5 pt-[132px] pb-4 sm:px-6 sm:pt-[148px]">
+      <section className="px-5 pt-[132px] pb-8 sm:px-6 sm:pt-[148px] sm:pb-10">
         <div className="mx-auto w-full max-w-[1040px]">
-          <Reveal>
-            <p className="m-0 font-sans text-[0.72rem] font-normal uppercase tracking-[0.18em] text-soil/55">
-              <span className="text-blush">●</span> Neural Tech — the archive
-            </p>
-          </Reveal>
-          <LineReveal as="h1" className={`${display} mt-4`} lines={["We keep", "the receipts."]} />
+          <LineReveal as="h1" className={display} lines={["We keep", "the receipts."]} />
           <Reveal delay={2}>
-            <p className="mt-5 max-w-[46ch] text-[0.95rem] leading-[1.65] text-soil/75">
-              Every event we’ve run, with the photos that came out of it. Each one keeps its own look —
-              open a gallery and take whatever you like.
-            </p>
-            <p className="mt-4 font-sans text-[0.75rem] uppercase tracking-[0.16em] text-soil/50">
-              {pad(rows.length)} event{rows.length === 1 ? "" : "s"} · {pad(totalPhotos)} photo
-              {totalPhotos === 1 ? "" : "s"}
+            <p className="mt-5 max-w-[40ch] text-[0.95rem] leading-[1.65] text-soil/75">
+              Every event we’ve run, with the photos that came out of it.
             </p>
           </Reveal>
         </div>
       </section>
 
-      <MarqueeHero items={marqueeItems} />
+      <MarqueeHero photos={photos} />
 
-      <section className={`${wrap} pb-24 sm:pb-32`}>
-        <Reveal>
-          <p className="m-0 font-sans text-[0.72rem] uppercase tracking-[0.18em] text-soil/50">Completed</p>
-        </Reveal>
-
+      <section className={`${wrap} pb-24 pt-6 sm:pb-32 sm:pt-8`}>
         <div className="ar-rows">
           {rows.map((event) => (
             <Link
@@ -103,13 +90,11 @@ export default function ArchiveHub() {
             </Link>
           ))}
 
-          <div className="ar-row ar-sealed" style={events[0]?.theme.tokens}>
+          <div className="ar-row ar-sealed">
             <span className="ar-mark" aria-hidden="true" />
             <span>
               <span className="ar-title">Classified</span>
-              <span className="ar-meta">
-                Next event pending · if we told you, it wouldn’t be a surprise
-              </span>
+              <span className="ar-meta">Next event pending · if we told you, it wouldn’t be a surprise</span>
             </span>
             <span className="ar-go">Sealed</span>
           </div>

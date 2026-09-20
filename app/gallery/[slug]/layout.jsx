@@ -4,7 +4,7 @@ import { getEvent } from "../events";
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const event = getEvent(slug);
-  if (!event) return { title: "Archive — Neural Tech" };
+  if (!event) return { title: "Gallery — Neural Tech" };
 
   const title = `${event.title} — photos — Neural Tech`;
   const description =

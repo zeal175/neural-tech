@@ -13,7 +13,7 @@ const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 const display =
   "font-display text-[clamp(2.6rem,7.5vw,5.75rem)] font-bold uppercase leading-[0.9] tracking-[0.02em]";
 
-const title = "Archive — Neural Tech";
+const title = "Gallery — Neural Tech";
 const description =
   "Every Neural Tech event we've run, with the photos. Browse an event's gallery and take whatever you like.";
 

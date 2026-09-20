@@ -63,7 +63,7 @@ export default function JoinPage() {
                 Events
               </a>
               <a className="transition-colors hover:text-blush" href="/gallery">
-                Event archive
+                Gallery
               </a>
               <a className="transition-colors hover:text-blush" href="/tartarus">
                 Tartarus briefing

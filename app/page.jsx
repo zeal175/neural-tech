@@ -99,7 +99,7 @@ export default function Home() {
               Contact us
             </a>
             <a className={btnGhost} href="/gallery">
-              See the archive
+              See the gallery
             </a>
           </Reveal>
         </div>
@@ -272,7 +272,7 @@ export default function Home() {
                 Events
               </a>
               <a className="transition-colors hover:text-blush" href="/gallery">
-                Event archive
+                Gallery
               </a>
               <a className="transition-colors hover:text-blush" href="/tartarus">
                 Tartarus briefing

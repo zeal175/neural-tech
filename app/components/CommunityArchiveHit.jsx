@@ -14,7 +14,7 @@ export default function CommunityArchiveHit({ children }) {
       className="relative min-h-[620px] w-full cursor-pointer md:min-h-[800px]"
       role="link"
       tabIndex={0}
-      aria-label="Open the event archive"
+      aria-label="Open the gallery"
       onPointerDown={(event) => {
         origin.current = { x: event.clientX, y: event.clientY };
       }}

@@ -47,7 +47,7 @@ export default async function EventGalleryPage({ params }) {
           </Link>
           <div className="mt-10 grid grid-cols-1 gap-8 border-t border-cream/15 pt-8 text-[0.88rem] sm:grid-cols-3">
             <Link className="transition-colors hover:text-blush" href="/gallery">
-              Event archive
+              Gallery
             </Link>
             {event.briefingHref ? (
               <Link className="transition-colors hover:text-blush" href={event.briefingHref}>

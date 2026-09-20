@@ -213,7 +213,7 @@ export default function TartarusPage() {
             Challenges
           </a>
           <a href="/gallery" onClick={() => setMenuOpen(false)} className="t-label transition-colors hover:text-[var(--t-phosphor)]">
-            Archive
+            Gallery
           </a>
           <div className="md:hidden">
             <a className="t-cta" href={ARCHIVE} onClick={() => setMenuOpen(false)}>
@@ -356,10 +356,10 @@ export default function TartarusPage() {
           <GlitchText
             as="p"
             className="mx-auto mt-8 max-w-[44ch] text-[1.1rem] leading-[1.7] text-[var(--t-ash)]"
-            text="Sign-ups are closed. This page stays as the record of what the day was. The photos are in the archive — take any of them with you."
+            text="Sign-ups are closed. This page stays as the record of what the day was. The photos are in the gallery — take any of them with you."
           />
           <a className="t-cta mt-10" href={ARCHIVE}>
-            Open the archive
+            Open the gallery
           </a>
         </Seen>
       </section>

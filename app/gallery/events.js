@@ -3,7 +3,11 @@
 
 import { themes } from "./themes";
 
-export const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL || "/enclave";
+// Same-origin path. Ignore leftover localhost:3001 (or any local URL) from old env/builds.
+const rawEnclaveUrl = (process.env.NEXT_PUBLIC_ENCLAVE_URL || "/enclave").trim();
+export const ENCLAVE_URL = /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.test(rawEnclaveUrl)
+  ? "/enclave"
+  : rawEnclaveUrl || "/enclave";
 
 export const events = [
   {

@@ -1419,20 +1419,24 @@ html.is-locked body {
   align-items: center;
   justify-content: center;
   width: fit-content;
-  min-height: 48px;
-  padding: 0.9rem 1.4rem;
-  background: var(--color-ink);
-  color: var(--color-cream);
-  font-family: var(--font-pixel), ui-monospace, monospace;
-  font-size: clamp(0.55rem, 0.9vw, 0.7rem);
-  letter-spacing: 0.28em;
+  min-height: 52px;
+  padding: 0.95rem 1.6rem;
+  background: #070605;
+  color: #f5ebdd;
+  font-family: var(--font-montserrat), var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-size: clamp(0.85rem, 1.4vw, 1rem);
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  border: 0;
 }
 
 .en-exit-cta:hover,
 .en-exit-cta:focus-visible {
   background: #010101;
-  outline: none;
+  color: #f5ebdd;
+  outline: 2px solid #070605;
+  outline-offset: 3px;
 }
 
 .en-exit-note {

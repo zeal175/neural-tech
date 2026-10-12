@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
-import { WHATSAPP_URL } from "@/lib/club-contact";
-
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 
 // Absolute hrefs so the header works on every page, not just the home page.
@@ -92,13 +90,11 @@ export default function SiteHeader() {
               </a>
             ))}
             <a
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/enclave"
               onClick={() => setMenuOpen(false)}
               className={`md:hidden text-[0.88rem] font-normal transition-colors duration-200 ${menuOpen ? "text-soil/70 hover:text-soil" : navLink}`}
             >
-              Contact us
+              Visit Enclave
             </a>
           </nav>
           <button
@@ -117,11 +113,9 @@ export default function SiteHeader() {
               className={`hidden md:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[0.84rem] font-normal transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98] ${
                 compact ? "bg-soil text-cream" : "bg-cream text-soil hover:bg-white"
               }`}
-              href={WHATSAPP_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/enclave"
             >
-              Contact us
+              Visit Enclave
             </a>
           ) : null}
         </div>

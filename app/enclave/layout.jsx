@@ -1,4 +1,4 @@
-import { JetBrains_Mono, Montserrat, Press_Start_2P, Six_Caps } from "next/font/google";
+import { JetBrains_Mono, Montserrat, Poppins, Press_Start_2P, Six_Caps } from "next/font/google";
 import localFont from "next/font/local";
 import { EVENT } from "@/lib/enclave/event";
 import "./enclave.css";
@@ -7,6 +7,12 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
   weight: ["400", "500"],
   variable: "--font-mono-jb",
+});
+
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-poppins",
 });
 
 const montserrat = Montserrat({
@@ -59,7 +65,7 @@ export const metadata = {
 export default function EnclaveLayout({ children }) {
   return (
     <div
-      className={`enclave-root ${mono.variable} ${montserrat.variable} ${pixel.variable} ${sixCaps.variable} ${pillar.variable}`}
+      className={`enclave-root ${mono.variable} ${poppins.variable} ${montserrat.variable} ${pixel.variable} ${sixCaps.variable} ${pillar.variable}`}
     >
       {children}
     </div>

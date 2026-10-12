@@ -13,26 +13,22 @@ export default function EnclavePass({ entry, onDone, onReset }) {
   const mate = team ? entry.passes[1] : null;
   const first = me.name.split(" ")[0];
   const mateFirst = mate ? mate.name.split(" ")[0] : "";
-  // which pass is on screen: 0 = theirs, 1 = their teammate's
   const [shown, setShown] = useState(0);
   useEffect(() => setShown(0), [entry]);
   const pass = useMemo(
     () => ({ ...(entry.passes[shown] || me), teamName: team ? entry.teamName : "" }),
-    [entry, shown, me, team]
+    [entry, shown, me, team],
   );
   const forMate = shown === 1;
+  const waUrl = EVENT.whatsappGroupUrl;
 
   const canvasRef = useRef(null);
   const [ready, setReady] = useState(false);
   const [canShare, setCanShare] = useState(false);
-  // phones: the share sheet is how a picture gets into the photo gallery ("Save image"), or to
-  // the teammate, so there it is the main action; a plain download lands in Files / Downloads
   const [touch, setTouch] = useState(false);
   useEffect(() => setTouch(matchMedia("(pointer: coarse)").matches), []);
   const shareFirst = canShare && touch;
   const setHero = useHero((s) => s.set);
-  // the PNG, made once the pass is drawn: Safari only opens the share sheet straight from the
-  // tap, so share() must not wait on canvas.toBlob first
   const fileRef = useRef(null);
 
   useEffect(() => {
@@ -76,7 +72,6 @@ export default function EnclavePass({ entry, onDone, onReset }) {
     try {
       await navigator.share({ files: [file], title: `${EVENT.name} pass`, text });
     } catch (error) {
-      // dismissed the share sheet: nothing to do; anything else: fall back to a download
       if (error?.name !== "AbortError") download();
     }
   };
@@ -88,29 +83,23 @@ export default function EnclavePass({ entry, onDone, onReset }) {
   };
 
   return (
-    <div className="mt-5 flex flex-col gap-5">
-      <div>
-        <h2 id="reg-title" className="font-display text-[clamp(2.4rem,4.4vw,3.4rem)] uppercase leading-[0.88]">
-          {entry.returning ? `Welcome back, ${first}.` : `You’re in, ${first}.`}
+    <div className="reg-pass-view">
+      <header className="reg-page-head">
+        <p className="en-kicker">{entry.returning ? "Welcome back" : "You’re in"}</p>
+        <h2 id="reg-title" className="en-display reg-page-title">
+          {first}
         </h2>
-        {team ? (
-          <p className="mt-2 text-[0.88rem] leading-[1.55] text-cream/60">
-            {entry.returning ? "You’re already registered. " : ""}
-            Team <span className="text-cream">{entry.teamName}</span>, with {mate.name}: a pass each. Send {mateFirst} theirs,
-            or they can get it here by entering their own RRN. Show the QR at the entrance{when || " on the day"}.
-          </p>
-        ) : (
-          <p className="mt-2 text-[0.88rem] leading-[1.55] text-cream/60">
-            {entry.returning ? "You’re already registered; here’s your pass. " : ""}
-            Pass <span className="font-mono text-cream">{me.passId}</span>. Show the QR at the entrance{when || " on the day"}.
-          </p>
-        )}
-      </div>
+        <p className="en-copy reg-page-lead">
+          {team
+            ? `Team ${entry.teamName} · show the QR at the door`
+            : `${me.passId} · show the QR at the door`}
+        </p>
+      </header>
 
       {team ? (
-        <div className="grid grid-cols-2 gap-1 rounded-full border border-cream/10 p-1" role="group" aria-label="Whose pass">
+        <div className="reg-entry-toggle" role="group" aria-label="Whose pass">
           {[
-            [0, `${first} (you)`],
+            [0, `${first}`],
             [1, mateFirst],
           ].map(([i, label]) => (
             <button
@@ -118,7 +107,7 @@ export default function EnclavePass({ entry, onDone, onReset }) {
               type="button"
               onClick={() => setShown(i)}
               aria-pressed={shown === i}
-              className={`min-h-10 truncate rounded-full px-3 text-[0.85rem] transition-colors ${shown === i ? "bg-cream text-ink" : "text-cream/70"}`}
+              className={`reg-entry-btn ${shown === i ? "is-on" : ""}`}
             >
               {label}
             </button>
@@ -127,43 +116,53 @@ export default function EnclavePass({ entry, onDone, onReset }) {
       ) : null}
 
       <div className="reg-pass-frame">
-        <canvas ref={canvasRef} className={`reg-pass ${ready ? "is-ready" : ""}`} aria-label={`ENCLAVE pass for ${pass.name}, ${pass.passId}`} role="img" />
+        <canvas
+          ref={canvasRef}
+          className={`reg-pass ${ready ? "is-ready" : ""}`}
+          aria-label={`ENCLAVE pass for ${pass.name}, ${pass.passId}`}
+          role="img"
+        />
       </div>
+
       {team ? (
-        <p className="-mt-2 font-mono text-[0.78rem] text-cream/50">
+        <p className="reg-footnote">
           {pass.name} · {pass.passId}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-3">
+      <div className="reg-pass-actions">
         {shareFirst ? (
           <>
-            <button type="button" className="cta" onClick={share} disabled={!ready} data-gaze="ignite">
-              {forMate ? `Send to ${mateFirst}` : team ? "Save my pass" : "Save pass"}
-              <span className="cta-dot" />
+            <button type="button" className="reg-submit" onClick={share} disabled={!ready}>
+              {forMate ? `Send to ${mateFirst}` : "Save pass"}
             </button>
-            <button type="button" className="pill-ghost" onClick={download}>
+            <button type="button" className="reg-pass-secondary" onClick={download}>
               Download
             </button>
           </>
         ) : (
           <>
-            <button type="button" className="cta" onClick={download} disabled={!ready} data-gaze="ignite">
-              {forMate ? `Download ${mateFirst}’s pass` : team ? "Download my pass" : "Download pass"}
-              <span className="cta-dot" />
+            <button type="button" className="reg-submit" onClick={download} disabled={!ready}>
+              {forMate ? `Download ${mateFirst}’s` : "Download pass"}
             </button>
             {canShare ? (
-              <button type="button" className="pill-ghost" onClick={share}>
+              <button type="button" className="reg-pass-secondary" onClick={share}>
                 {forMate ? `Send to ${mateFirst}` : "Share"}
               </button>
             ) : null}
           </>
         )}
-        <button type="button" className="pill-ghost" onClick={onDone}>
+        {waUrl ? (
+          <a className="reg-pass-whatsapp" href={waUrl} target="_blank" rel="noreferrer">
+            Join WhatsApp group
+          </a>
+        ) : null}
+        <button type="button" className="reg-pass-secondary" onClick={onDone}>
           Done
         </button>
       </div>
-      <button type="button" onClick={notMe} className="reg-link self-start text-[0.78rem] text-cream/40 underline-offset-4 hover:text-cream hover:underline">
+
+      <button type="button" onClick={notMe} className="reg-pass-reset">
         Not {first}? Register someone else
       </button>
     </div>

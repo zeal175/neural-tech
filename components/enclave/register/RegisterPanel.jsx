@@ -46,16 +46,11 @@ function fieldsFor(entry) {
   );
   return entry === "team" ? [TEAM_NAME, ...people] : people;
 }
-const ALL_FIELDS = fieldsFor("team");
+const ALL_FIELDS = fieldsFor("solo");
 const fieldByKey = (key) => ALL_FIELDS.find((f) => f.key === key);
 const OTHER = "__other";
 const coarse = () => typeof matchMedia !== "undefined" && matchMedia("(pointer: coarse)").matches;
 const EMPTY = Object.fromEntries(ALL_FIELDS.map((f) => [f.key, ""]));
-const ENTRIES = [
-  ["solo", "Solo"],
-  ["team", "Team of 2"],
-];
-
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Stage NDC of a viewport point (the hero stage is the gaze plane). */
@@ -88,7 +83,7 @@ export default function RegisterPanel() {
   const panel = useHero((s) => s.panel);
   const pass = useHero((s) => s.pass);
   const setHero = useHero((s) => s.set);
-  const [entry, setEntry] = useState("solo"); // solo | team
+  const entry = "solo";
   const fields = fieldsFor(entry);
   const lastKey = fields[fields.length - 1].key;
   const [values, setValues] = useState(EMPTY);
@@ -285,16 +280,6 @@ export default function RegisterPanel() {
     if (typing) requestAnimationFrame(() => panelRef.current?.querySelector(`[data-other="${f.key}"]`)?.focus());
   };
 
-  const switchEntry = (next) => {
-    if (next === entry) return;
-    setEntry(next);
-    // errors on fields that just went away would linger unseen
-    const keep = new Set(fieldsFor(next).map((f) => f.key));
-    setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => keep.has(k))));
-    setServerError("");
-    live.form.progress = progressOf(values, fieldsFor(next));
-  };
-
   // ---- submit
   const submit = async (e) => {
     e.preventDefault();
@@ -356,7 +341,6 @@ export default function RegisterPanel() {
       // "Register someone else" then starts from an empty form, not these details
       setValues(EMPTY);
       setOther({});
-      setEntry("solo");
       setStatus("idle");
       setHero({ pass: { ...saved, returning: !!data.duplicate }, panel: "pass" });
       live.form.progress = 1;
@@ -417,7 +401,7 @@ export default function RegisterPanel() {
               Enter the {EVENT.name}
             </h2>
             <p className="mt-3 text-[0.9rem] leading-[1.6] text-cream/60">
-              {WHEN_WHERE}. Come solo or as a team of two: one form, and a pass with a QR code for each of you.
+              {WHEN_WHERE}. One form, one pass with a QR code for the door.
             </p>
 
             {status === "unconfigured" || status === "closed" ? (
@@ -434,20 +418,6 @@ export default function RegisterPanel() {
               </div>
             ) : (
               <form className="reg-form" onSubmit={submit} noValidate>
-                <div className="col-span-2 grid grid-cols-2 gap-1 rounded-full border border-cream/10 p-1" role="radiogroup" aria-label="Entry">
-                  {ENTRIES.map(([key, label]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      role="radio"
-                      aria-checked={entry === key}
-                      onClick={() => switchEntry(key)}
-                      className={`min-h-11 rounded-full text-[0.9rem] transition-colors ${entry === key ? "bg-cream text-ink" : "text-cream/70 hover:text-cream"}`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
                 {fields.map((f, i) => {
                   const typing = !!other[f.key];
                   const err = errors[f.key];
@@ -471,13 +441,7 @@ export default function RegisterPanel() {
                     "aria-invalid": !!err,
                     "aria-describedby": err ? errId : undefined,
                   };
-                  // a team's form: "You" above your details, "Your teammate" above theirs
-                  const heading =
-                    entry === "team" && f.name === "name" ? (
-                      <p className={`reg-member col-span-2 ${f.member ? "is-mate" : ""}`}>
-                        {f.member ? "Your teammate" : "You"}
-                      </p>
-                    ) : null;
+                  const heading = null;
                   return (
                     <Fragment key={f.key}>
                       {heading}
@@ -538,7 +502,7 @@ export default function RegisterPanel() {
                 ) : null}
 
                 <button type="submit" className="cta col-span-2 mt-2 justify-center" data-gaze="ignite" disabled={status === "submitting"}>
-                  {status === "submitting" ? "Scanning…" : entry === "team" ? "Claim our passes" : "Claim my pass"}
+                  {status === "submitting" ? "Scanning…" : "Claim my pass"}
                   <span className="cta-dot" />
                 </button>
                 <p className="col-span-2 text-center text-[0.78rem] leading-[1.5] text-cream/45">

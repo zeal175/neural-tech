@@ -10,7 +10,7 @@ export default function SiteNav() {
       <nav className="en-nav-links" aria-label="Site">
         <a href="/enclave">Entrance</a>
         <a href="/enclave/register">Register</a>
-        <a href="/">Club site</a>
+        <a href="/">Club&nbsp;site</a>
       </nav>
     </header>
   );

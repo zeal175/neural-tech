@@ -1,7 +1,9 @@
 "use client";
 
 import { EVENT } from "@/lib/enclave/event";
+import GlitchText from "./hero/GlitchText";
 import RevealCell from "./RevealCell";
+import SampleVideo from "./SampleVideo";
 
 const BLOCKS = [
   {
@@ -107,18 +109,7 @@ export default function EnclaveBody() {
 
           <RevealCell dir="down" delay={180} className="en-sample-media">
             <div className="en-sample-slot">
-              <video
-                className="en-sample-video"
-                src="/enclave/videos/sample-program.mp4"
-                poster=""
-                autoPlay
-                muted
-                loop
-                playsInline
-                controls
-                preload="metadata"
-                aria-label="Sample program"
-              />
+              <SampleVideo className="en-sample-video" src="/enclave/videos/sample-program.mp4" />
             </div>
           </RevealCell>
         </section>
@@ -160,6 +151,18 @@ export default function EnclaveBody() {
           </RevealCell>
         </section>
 
+        {/* Decorative brand lock — Pillar + glitch; not a content headline */}
+        <section className="en-brand-lock" aria-hidden="true">
+          <GlitchText
+            text="ENCLAVE"
+            mode="idle"
+            cutIn
+            size={0.28}
+            className="en-brand-glitch"
+            style={{ width: "min(78vw, 520px)", marginInline: "auto" }}
+          />
+        </section>
+
         <section className="en-facts-band" aria-label="Event details">
           <RevealCell dir="down" delay={0} className="en-facts">
             {FACTS.map(([label, value]) => (
@@ -174,17 +177,25 @@ export default function EnclaveBody() {
 
       <RevealCell dir="flood" delay={0} as="section" className="en-exit">
         <div className="en-exit-inner">
-          <div className="en-exit-meta">
-            <p className="en-kicker en-kicker-on-ember">Exit</p>
-            <p className="en-kicker en-kicker-on-ember">08 / 08</p>
-          </div>
           <h2 className="en-exit-mark">Exit</h2>
           <p className="en-exit-line">
             By the end, you’ll have built a program from nothing.
           </p>
-          <a href={EVENT.registerUrl} className="en-exit-cta">
-            Register →
-          </a>
+          <div className="en-exit-actions">
+            <a href={EVENT.registerUrl} className="en-exit-cta">
+              Register →
+            </a>
+            {EVENT.whatsappGroupUrl ? (
+              <a
+                href={EVENT.whatsappGroupUrl}
+                className="en-exit-wa"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Join WhatsApp
+              </a>
+            ) : null}
+          </div>
           <p className="en-exit-note">
             {EVENT.club} · seats limited · experience needed: none
           </p>

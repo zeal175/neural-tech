@@ -88,17 +88,13 @@ function fieldsFor(entry) {
   return entry === "team" ? [TEAM_NAME, ...people] : people;
 }
 
-const ALL_FIELDS = fieldsFor("team");
+const ALL_FIELDS = fieldsFor("solo");
 const fieldByKey = (key) => ALL_FIELDS.find((f) => f.key === key);
 const OTHER = "__other";
 const EMPTY = Object.fromEntries(ALL_FIELDS.map((f) => [f.key, ""]));
-const ENTRIES = [
-  ["solo", "Solo"],
-  ["team", "Team of 2"],
-];
 
 export default function RegisterForm() {
-  const [entry, setEntry] = useState("solo");
+  const entry = "solo";
   const fields = fieldsFor(entry);
   const lastKey = fields[fields.length - 1].key;
   const [values, setValues] = useState(EMPTY);
@@ -158,16 +154,12 @@ export default function RegisterForm() {
     update(f.key, typing ? "" : value);
   };
 
-  const switchEntry = (next) => {
-    if (next === entry) return;
-    setEntry(next);
-    const keep = new Set(fieldsFor(next).map((f) => f.key));
-    setErrors((e) => Object.fromEntries(Object.entries(e).filter(([k]) => keep.has(k))));
-    setServerError("");
-  };
-
   const onProof = (file) => {
-    if (!file) return;
+    if (!file) {
+      setProof(null);
+      setErrors((e) => ({ ...e, payment: "Upload a screenshot of your UPI payment." }));
+      return;
+    }
     if (file.size > 5 * 1024 * 1024) {
       setErrors((e) => ({ ...e, payment: "That image is too large (max 5 MB)." }));
       return;
@@ -189,16 +181,18 @@ export default function RegisterForm() {
 
     const found = {};
     for (const f of fields) {
-      const ok = f.check(values[f.key]);
+      const ok = f.check(values[f.key] ?? "");
       if (ok !== true) found[f.key] = ok;
     }
-    const rrn = (m) => values[`${m}.rrn`].trim().toUpperCase();
-    if (entry === "team" && !found["1.rrn"] && rrn(1) === rrn(0)) found["1.rrn"] = "That’s your RRN. Add your teammate’s.";
-    // payment is required for first-time entries; the server skips it when the RRN is already on file
+    if (!proof) found.payment = "Upload a screenshot of your UPI payment.";
     setServerError("");
     if (Object.keys(found).length) {
       setErrors(found);
-      focusField(Object.keys(found)[0]);
+      const first = Object.keys(found)[0];
+      if (first === "payment") {
+        fileInput.current?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+        fileInput.current?.focus?.();
+      } else focusField(first);
       return;
     }
 
@@ -236,7 +230,6 @@ export default function RegisterForm() {
       savePass(saved);
       setValues(EMPTY);
       setOther({});
-      setEntry("solo");
       setProof(null);
       setStatus("idle");
       setPass({ ...saved, returning: !!data.duplicate });
@@ -262,7 +255,6 @@ export default function RegisterForm() {
     setPass(null);
     setValues(EMPTY);
     setOther({});
-    setEntry("solo");
     setProof(null);
     setErrors({});
     setServerError("");
@@ -280,12 +272,13 @@ export default function RegisterForm() {
 
   return (
     <div className="reg-page-body">
-      <p className="en-kicker">Registration</p>
-      <h1 className="en-display reg-page-title">Enter the {EVENT.name}</h1>
-      <p className="en-copy reg-page-lead">
-        {WHEN_WHERE}. Fee {EVENT.fee}. Come solo or as a team of two — one form, a pass each. Pay via UPI, upload the
-        screenshot, and claim your pass.
-      </p>
+      <header className="reg-page-head">
+        <p className="en-kicker">Registration</p>
+        <h1 className="en-display reg-page-title">{EVENT.name}</h1>
+        <p className="en-copy reg-page-lead">
+          {WHEN_WHERE} · {EVENT.fee}
+        </p>
+      </header>
 
       {status === "unconfigured" || status === "closed" ? (
         <div className="reg-page-notice">
@@ -298,21 +291,6 @@ export default function RegisterForm() {
         </div>
       ) : (
         <form className="reg-form reg-page-form" onSubmit={submit} noValidate>
-          <div className="reg-entry-toggle col-span-2" role="radiogroup" aria-label="Entry">
-            {ENTRIES.map(([key, label]) => (
-              <button
-                key={key}
-                type="button"
-                role="radio"
-                aria-checked={entry === key}
-                onClick={() => switchEntry(key)}
-                className={`reg-entry-btn ${entry === key ? "is-on" : ""}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-
           {fields.map((f) => {
             const typing = !!other[f.key];
             const err = errors[f.key];
@@ -328,13 +306,8 @@ export default function RegisterForm() {
               "aria-invalid": !!err,
               "aria-describedby": err ? errId : undefined,
             };
-            const heading =
-              entry === "team" && f.name === "name" ? (
-                <p className={`reg-member col-span-2 ${f.member ? "is-mate" : ""}`}>{f.member ? "Your teammate" : "You"}</p>
-              ) : null;
             return (
               <Fragment key={f.key}>
-                {heading}
                 <label className={`reg-field ${f.span === 2 ? "col-span-2" : ""}`}>
                   <span className="mono-label text-cream/55">{f.label}</span>
                   {f.type === "select" ? (
@@ -344,6 +317,8 @@ export default function RegisterForm() {
                         value={typing ? OTHER : values[f.key]}
                         className={!typing && !values[f.key] ? "is-empty" : undefined}
                         onChange={(e) => pick(f, e.target.value)}
+                        required={!typing}
+                        aria-required="true"
                         aria-invalid={!typing && !!err}
                         aria-describedby={!typing && err ? errId : undefined}
                       >
@@ -358,7 +333,16 @@ export default function RegisterForm() {
                         {f.other ? <option value={OTHER}>Other</option> : null}
                       </select>
                       {typing ? (
-                        <input {...textProps} type="text" autoComplete="off" placeholder={f.other} data-other={f.key} aria-label={f.label} />
+                        <input
+                          {...textProps}
+                          type="text"
+                          autoComplete="off"
+                          placeholder={f.other}
+                          data-other={f.key}
+                          aria-label={f.label}
+                          required
+                          aria-required="true"
+                        />
                       ) : null}
                     </>
                   ) : (
@@ -369,6 +353,8 @@ export default function RegisterForm() {
                       placeholder={f.placeholder}
                       autoComplete={f.autoComplete || "off"}
                       inputMode={f.inputMode}
+                      required
+                      aria-required="true"
                     />
                   )}
                   {err ? (
@@ -382,12 +368,10 @@ export default function RegisterForm() {
           })}
 
           <section className="reg-pay col-span-2" aria-label="Payment">
-            <p className="en-kicker">Pay {EVENT.fee}</p>
-            <h2 className="reg-pay-title">UPI QR code</h2>
-            <p className="en-copy">
-              Scan this QR with any UPI app, pay {EVENT.fee}
-              {EVENT.upiVpa ? ` to ${EVENT.upiVpa}` : ""}, then upload the payment screenshot below.
-            </p>
+            <div className="reg-pay-head">
+              <p className="en-kicker">Payment</p>
+              <p className="reg-pay-amount">{EVENT.fee}</p>
+            </div>
 
             <div className="reg-pay-grid">
               <div className="reg-pay-qr">
@@ -406,7 +390,6 @@ export default function RegisterForm() {
                       height={280}
                       onError={() => setQrOk(false)}
                     />
-                    <span className="reg-pay-qr-hint">Tap to enlarge or save</span>
                   </button>
                 ) : (
                   <p className="reg-error" role="alert">
@@ -414,16 +397,7 @@ export default function RegisterForm() {
                   </p>
                 )}
               </div>
-              <div className="reg-pay-meta">
-                <p className="en-kicker">Amount</p>
-                <p className="reg-pay-amount">{EVENT.fee}</p>
-                {EVENT.upiVpa ? (
-                  <>
-                    <p className="en-kicker">UPI ID</p>
-                    <p className="reg-pay-vpa">{EVENT.upiVpa}</p>
-                  </>
-                ) : null}
-              </div>
+              {EVENT.upiVpa ? <p className="reg-pay-vpa">{EVENT.upiVpa}</p> : null}
             </div>
 
             <label className="reg-field reg-pay-upload" data-field="payment">
@@ -433,6 +407,8 @@ export default function RegisterForm() {
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                 capture="environment"
+                required={!proof}
+                aria-required="true"
                 onChange={(e) => onProof(e.target.files?.[0] || null)}
                 aria-invalid={!!errors.payment}
               />
@@ -441,7 +417,7 @@ export default function RegisterForm() {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   {proofPreview ? <img src={proofPreview} alt="Payment screenshot preview" /> : null}
                   <button type="button" className="reg-pay-change" onClick={() => fileInput.current?.click()}>
-                    Change image
+                    Change
                   </button>
                 </div>
               ) : null}
@@ -480,14 +456,10 @@ export default function RegisterForm() {
             </p>
           ) : null}
 
-          <button type="submit" className="cta col-span-2 mt-2 justify-center" disabled={status === "submitting"}>
-            {status === "submitting" ? "Saving…" : entry === "team" ? "Claim our passes" : "Claim my pass"}
-            <span className="cta-dot" />
+          <button type="submit" className="reg-submit col-span-2" disabled={status === "submitting"}>
+            {status === "submitting" ? "Saving…" : "Claim pass"}
           </button>
-          <p className="col-span-2 text-center text-[0.78rem] leading-[1.5] text-cream/45">
-            Already registered? Enter your details again with the same RRN — you’ll get your pass back without paying
-            twice.
-          </p>
+          <p className="reg-footnote col-span-2">Same RRN returns your pass.</p>
         </form>
       )}
     </div>

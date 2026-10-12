@@ -1,5 +1,5 @@
 // Registration endpoint. Multipart form: entry fields + payment screenshot.
-// Solo or team of two; each member gets an ENCLAVE pass.
+// Solo registration; each person gets an ENCLAVE pass.
 import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { EVENT, YEARS } from "@/lib/enclave/event";
@@ -119,22 +119,22 @@ export async function POST(request) {
   const body = await parseBody(request);
   if (!body) return fail(400, null, "That didn’t send. Try again.");
 
-  const team = body.entry === "team";
-  const members = (Array.isArray(body.members) ? body.members : []).slice(0, team ? 2 : 1).map(member);
-  const teamName = team ? body.teamName : "";
+  if (body.entry === "team") return fail(400, null, "Registration is solo only.");
+
+  const team = false;
+  const members = (Array.isArray(body.members) ? body.members : []).slice(0, 1).map(member);
+  const teamName = "";
 
   if (body.company) {
     const passes = members.map((m) => ({ passId: passId(), name: m.name, dept: m.dept, section: m.section, year: m.year }));
-    return NextResponse.json({ ok: true, entry: team ? "team" : "solo", teamName, passes, passId: passes[0]?.passId });
+    return NextResponse.json({ ok: true, entry: "solo", teamName, passes, passId: passes[0]?.passId });
   }
 
-  if (team && teamName.length < 2) return fail(400, "teamName", "Give your team a name.");
-  if (team && members.length < 2) return fail(400, "1.name", "Add your teammate.");
+  if (!members.length) return fail(400, "0.name", "Add your name so we know who you are.");
   for (const [i, m] of members.entries()) {
     const bad = problem(m, i);
     if (bad) return fail(400, `${i}.${bad[0]}`, bad[1]);
   }
-  if (team && members[0].rrn === members[1].rrn) return fail(400, "1.rrn", "That’s your RRN. Add your teammate’s.");
 
   // already registered: hand their pass back without asking for another payment
   try {

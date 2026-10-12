@@ -10,42 +10,35 @@ import { loadPass } from "@/components/enclave/register/passStorage";
 import { MODEL_URL, TEXTURES } from "@/lib/enclave/assets";
 import { EVENT, WHEN_WHERE } from "@/lib/enclave/event";
 import Countdown from "./Countdown";
+import GlitchText from "./GlitchText";
 import { SHOW_FIGURE, emit, live, useHero } from "./heroStore";
-import usePhosphorGlitch from "./PhosphorGlitch";
 
 if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const HeroCanvas = dynamic(() => import("./HeroCanvas"), { ssr: false });
+
+// letter stagger only used when the 3D figure hero splits the wordmark on scroll
 const LETTERS = EVENT.name.split("");
-
-// Each letter's box is given its width in Pillar (advance + letter-spacing, in em; they sum to
-// the title's 1.345em), so nothing moves when Pillar replaces the fallback font on load.
 const PILLAR_ADVANCE = { E: 0.196, N: 0.211, C: 0.196, L: 0.154, A: 0.196, V: 0.196 };
-
-function Letters() {
-  return LETTERS.map((ch, i) => (
-    <span
-      key={i}
-      className="ch"
-      data-i={i}
-      style={PILLAR_ADVANCE[ch] ? { width: `${PILLAR_ADVANCE[ch]}em` } : undefined}
-    >
-      {ch}
-    </span>
-  ));
-}
-
-// the same letter in every layer (top half, bottom half, outline) must move together
 const byLetter = (step) => (_, el) => Number(el.dataset.i) * step;
 
-function Title({ as: Tag = "div", label, titleRef }) {
+function FigureTitle({ titleRef }) {
   return (
-    <Tag ref={titleRef} className="hero-title">
-      <span className="sr-only">{label}</span>
+    <h1 ref={titleRef} className="hero-title">
+      <span className="sr-only">{EVENT.name}</span>
       <span aria-hidden="true">
-        <Letters />
+        {LETTERS.map((ch, i) => (
+          <span
+            key={i}
+            className="ch"
+            data-i={i}
+            style={PILLAR_ADVANCE[ch] ? { width: `${PILLAR_ADVANCE[ch]}em` } : undefined}
+          >
+            {ch}
+          </span>
+        ))}
       </span>
-    </Tag>
+    </h1>
   );
 }
 
@@ -85,6 +78,7 @@ export default function Hero() {
   const cursorRef = useRef(null);
   const ctaRef = useRef(null);
   const titleRef = useRef(null);
+  const [glitchPlay, setGlitchPlay] = useState(false);
   const [inView, setInView] = useState(true);
   const [fine, setFine] = useState(false);
   // the UI is painted from the first frame (under the opaque loader) but stays inert until the
@@ -170,6 +164,7 @@ export default function Hero() {
   useEffect(() => {
     const stage = stageRef.current;
     const cursor = cursorRef.current;
+    if (!stage || !cursor) return undefined;
     const curX = gsap.quickTo(cursor, "x", { duration: 0.32, ease: "power3" });
     const curY = gsap.quickTo(cursor, "y", { duration: 0.32, ease: "power3" });
     const layers = stage.querySelectorAll("[data-parallax]");
@@ -184,6 +179,29 @@ export default function Hero() {
         inside: e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom,
       };
     };
+
+    // title mode: just the custom cursor (no figure charge / tilt)
+    if (!SHOW_FIGURE) {
+      const onMove = (e) => {
+        const p = toNdc(e);
+        Object.assign(live.pointer, p, { lastMove: performance.now() });
+        if (!live.pointer.fine) return;
+        curX(e.clientX);
+        curY(e.clientY);
+        cursor.style.opacity = p.inside ? "1" : "0";
+      };
+      const onLeave = () => {
+        live.pointer.inside = false;
+        cursor.style.opacity = "0";
+      };
+      window.addEventListener("pointermove", onMove, { passive: true });
+      document.documentElement.addEventListener("pointerleave", onLeave);
+      return () => {
+        window.removeEventListener("pointermove", onMove);
+        document.documentElement.removeEventListener("pointerleave", onLeave);
+        cursor.style.opacity = "0";
+      };
+    }
 
     const onMove = (e) => {
       const p = toNdc(e);
@@ -353,9 +371,9 @@ export default function Hero() {
     return () => io.disconnect();
   }, []);
 
-  // ---- smooth scroll
+  // ---- smooth scroll (figure hero only — title mode uses native scroll)
   useEffect(() => {
-    if (reducedMotion) return;
+    if (reducedMotion || !SHOW_FIGURE) return;
     const lenis = new Lenis({ lerp: 0.09, smoothWheel: true });
     lenis.on("scroll", ScrollTrigger.update);
     live.lenis = lenis;
@@ -381,7 +399,6 @@ export default function Hero() {
   // ---- returning visitor: greet them by name once the figure is awake
   const introDone = useHero((s) => s.introDone);
   const pass = useHero((s) => s.pass);
-  usePhosphorGlitch(titleRef, { on: introDone, reduced: reducedMotion });
   useEffect(() => {
     const saved = loadPass();
     if (saved) setHero({ pass: saved });
@@ -440,7 +457,8 @@ export default function Hero() {
         Object.assign(live.intro, { scan: 1, rim: 1, ignite: 0 });
         gsap.set("[data-loader]", { autoAlpha: 0 });
         gsap.set("[data-ui]", { autoAlpha: 1, y: 0 });
-        gsap.set(".hero-hook", { autoAlpha: 0.55 });
+        gsap.set(".hero-hook", { clearProps: "opacity,visibility" });
+        setGlitchPlay(true);
         done();
         return;
       }
@@ -455,13 +473,13 @@ export default function Hero() {
       });
       if (!SHOW_FIGURE) {
         live.intro.scan = live.intro.rim = 1;
+        // leave opacity to CSS arcade blink — don’t lock autoAlpha
         tl.to("[data-loader]", { autoAlpha: 0, duration: 0.45, ease: "power2.out" }, 0)
-          .fromTo(".hero-title .ch", { yPercent: 120 }, { yPercent: 0, duration: 1.2, stagger: byLetter(0.05) }, 0.12)
-          .fromTo(".hero-hook", { autoAlpha: 0 }, { autoAlpha: 0.55, duration: 0.8 }, 0.7);
+          .call(() => setGlitchPlay(true), null, 0.08)
+          .set(".hero-hook", { clearProps: "opacity,visibility" }, 0.2);
       } else {
         tl.to("[data-loader]", { autoAlpha: 0, duration: 0.7, ease: "power2.out" }, 0)
           .to(live.intro, { scan: 1, duration: 2.1, ease: "power2.inOut" }, 0.2)
-          // the backlight fades up smoothly (a strobing "neon strike" reads as flicker)
           .to(live.intro, { rim: 1, duration: 1.6, ease: "power2.inOut" }, 0.7)
           .fromTo(".hero-title .ch", { yPercent: 120 }, { yPercent: 0, duration: 1.5, stagger: byLetter(0.06) }, 0.5)
           .to(live.intro, { ignite: 1, duration: 0.22, ease: "power2.out" }, 1.85)
@@ -497,7 +515,7 @@ export default function Hero() {
   );
 
   return (
-    <section ref={heroRef} className={`hero${SHOW_FIGURE ? "" : " is-title"}`} id="top">
+    <section ref={heroRef} className={`hero${SHOW_FIGURE ? "" : " is-title"}`}>
       <div
         ref={stageRef}
         className={`hero-stage ${fine ? "has-cursor" : ""}`}
@@ -505,16 +523,20 @@ export default function Hero() {
       >
         <div className="hero-bg" />
 
-        {!SHOW_FIGURE ? (
-          <div className="hero-bookend" aria-hidden="true">
-            <span className="mono-label text-ember">Entrance</span>
-            <span className="mono-label text-cream/45">00 / 08</span>
-          </div>
-        ) : null}
-
-        <div className="hero-title-wrap" data-parallax>
-          <Title as="h1" label={EVENT.name} titleRef={titleRef} />
-          <p className="hero-hook mono-label">Find the exit.</p>
+        <div className="hero-title-wrap" data-parallax={!SHOW_FIGURE ? undefined : true}>
+          {SHOW_FIGURE ? (
+            <FigureTitle titleRef={titleRef} />
+          ) : (
+            <GlitchText
+              as="h1"
+              text={EVENT.name}
+              mode="idle"
+              play={glitchPlay}
+              size={0.3}
+              className="hero-title hero-title-glitch"
+            />
+          )}
+          <p className="hero-hook">Find the exit.</p>
         </div>
 
         {SHOW_FIGURE &&
@@ -541,7 +563,7 @@ export default function Hero() {
           <div className="hero-ui" inert={!revealed}>
             <div data-ui-scroll className="absolute inset-0">
               <header className="absolute inset-x-0 top-0 flex items-center justify-between px-5 pt-5 sm:px-8 sm:pt-7">
-                <a href="#top" data-ui className="hero-logo flex items-center gap-3" aria-label={EVENT.club}>
+                <a href="/enclave" data-ui className="hero-logo flex items-center gap-3" aria-label={EVENT.club}>
                   <img src="/enclave/brand/neural-tech-logo-96.webp" alt="" width={30} height={32} className="h-8 w-auto" />
                   <span className="hidden text-[0.82rem] text-cream/80 sm:inline">{EVENT.club}</span>
                 </a>

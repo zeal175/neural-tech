@@ -12,14 +12,12 @@ import "./events.css";
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 const heroDisplay =
   "font-display text-[clamp(3.25rem,10vw,9rem)] font-bold uppercase leading-[0.88] tracking-[0.02em]";
-const sealedDisplay =
-  "font-display text-[clamp(2.8rem,8vw,7rem)] font-bold uppercase leading-[0.88] tracking-[0.02em]";
 const btnFill =
   "inline-flex items-center justify-center rounded-full bg-cream px-5 py-2.5 text-[0.84rem] font-normal text-soil transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-white active:scale-[0.98]";
 
 const title = "Events — Neural Tech";
 const description =
-  "Tartarus is a live AI competition — not a hackathon, not a workshop. One day inside a hostile system.";
+  "Enclave is next. Tartarus already ran. Neural Tech’s live days — not a calendar of maybes.";
 
 export const metadata = {
   title,
@@ -57,18 +55,18 @@ export default function EventsPage() {
             as="h1"
             className={`${heroDisplay} text-cream`}
             lines={[
-              <span className="whitespace-nowrap">Here’s the</span>,
-              <span className="whitespace-nowrap">record.</span>,
+              <span className="whitespace-nowrap">The next</span>,
+              <span className="whitespace-nowrap">door.</span>,
             ]}
           />
           <Reveal delay={2} className="w-full min-w-0">
             <p className="mx-auto mt-5 max-w-[28ch] px-1 text-[0.9rem] font-normal leading-[1.5] text-cream/85 sm:max-w-[34ch]">
-              Live rooms. Shared clocks. No take-home brief. One day so far.
+              Enclave is coming. Tartarus already ran.
             </p>
           </Reveal>
           <Reveal delay={3} className="mt-6">
-            <a className={btnFill} href="#tartarus">
-              Tartarus
+            <a className={btnFill} href="#enclave">
+              Enclave
               <svg className="ml-1" width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                   d="M5 12h14M13 6l6 6-6 6"
@@ -86,6 +84,8 @@ export default function EventsPage() {
       {events.map((event, index) => {
         const cells = ticketCells(event);
         const galleryHref = listPhotoFiles(event.slug).length ? `/gallery/${event.slug}` : null;
+        const actionHref = event.upcoming && event.briefingHref ? event.briefingHref : galleryHref;
+        const actionLabel = event.upcoming ? "The briefing" : "See the photos";
 
         return (
           <article
@@ -149,10 +149,10 @@ export default function EventsPage() {
                     </Reveal>
                   ) : null}
 
-                  {galleryHref ? (
+                  {actionHref ? (
                     <Reveal delay={4}>
-                      <Link className="ev-btn" href={galleryHref}>
-                        See the photos
+                      <Link className="ev-btn" href={actionHref}>
+                        {actionLabel}
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                           <path
                             d="M5 12h14M13 6l6 6-6 6"
@@ -171,15 +171,6 @@ export default function EventsPage() {
           </article>
         );
       })}
-
-      <section className="ev-sealed">
-        <div className="ev-sealed-inner">
-          <LineReveal as="h2" className={sealedDisplay} lines={["If we told you."]} />
-          <Reveal delay={2}>
-            <p>It wouldn’t be a surprise. Next one stays sealed. Show up anyway.</p>
-          </Reveal>
-        </div>
-      </section>
 
       <footer className="cv-auto bg-soil text-cream">
         <div className={`${wrap} py-16 sm:py-20`}>
@@ -200,7 +191,10 @@ export default function EventsPage() {
             <Link className="transition-colors hover:text-blush" href="/">
               Back to the club site
             </Link>
-            <span className="text-cream/45 sm:justify-self-end sm:col-start-3">© 2026 Neural Tech</span>
+            <Link className="transition-colors hover:text-blush" href="/enclave">
+              Enclave briefing
+            </Link>
+            <span className="text-cream/45 sm:justify-self-end">© 2026 Neural Tech</span>
           </div>
         </div>
       </footer>

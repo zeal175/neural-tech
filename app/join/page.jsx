@@ -65,6 +65,9 @@ export default function JoinPage() {
               <a className="transition-colors hover:text-blush" href="/gallery">
                 Gallery
               </a>
+              <a className="transition-colors hover:text-blush" href="/enclave">
+                Enclave briefing
+              </a>
               <a className="transition-colors hover:text-blush" href="/tartarus">
                 Tartarus briefing
               </a>

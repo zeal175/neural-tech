@@ -1,9 +1,37 @@
-// Completed events, newest first. Each one with photos gets a gallery at
-// /gallery/<slug>. Blank fields are omitted by the UI.
+// Events, newest first. Each one with photos gets a gallery at /gallery/<slug>.
+// Blank fields are omitted by the UI.
 
 import { themes } from "./themes";
 
 export const events = [
+  {
+    slug: "enclave",
+    title: "ENCLAVE",
+    kicker: "Upcoming · live day",
+    date: "",
+    time: "",
+    venue: "",
+    mark: "",
+    markAlt: "The Enclave bust",
+    featured: true,
+    upcoming: true,
+    short: "Enclave",
+    cover: "/enclave/cover.png",
+    coverWidth: 2160,
+    coverHeight: 2700,
+    blurb:
+      "The next live day. Not Tartarus — a different door. Solo or a team of two. One form, a pass each, QR at the door. Date soon. Crescent.",
+    beats: [
+      "Walk in alone, or as a pair.",
+      "One registration. A pass for each of you.",
+      "Show the QR. That’s the door.",
+      "Date and room still incoming.",
+    ],
+    tags: ["upcoming", "live day"],
+    stats: [],
+    briefingHref: "/enclave",
+    theme: themes.ember,
+  },
   {
     slug: "tartarus",
     title: "TARTARUS",

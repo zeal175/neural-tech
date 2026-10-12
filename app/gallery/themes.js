@@ -31,6 +31,30 @@ export const themes = {
     },
   },
 
+  // Enclave: ink, ember, cream. Matches the standalone event site without
+  // borrowing Tartarus CRT or painting the club cream page.
+  ember: {
+    name: "ember",
+    font: null,
+    chrome: { scanlines: false, glitch: false, sweep: false },
+    tokens: {
+      "--ev-bg": "#070605",
+      "--ev-surface": "#0e0c0b",
+      "--ev-line": "rgba(245, 235, 221, 0.14)",
+      "--ev-ink": "#f5ebdd",
+      "--ev-dim": "rgba(245, 235, 221, 0.58)",
+      "--ev-accent": "#f9725a",
+      "--ev-accent-dim": "#c8321b",
+      "--ev-accent-ink": "#070605",
+      "--ev-warn": "#8fa2c9",
+      "--ev-radius": "0px",
+      "--ev-display": "var(--font-screamer), ui-sans-serif, sans-serif",
+      "--ev-display-weight": "700",
+      "--ev-ui": "var(--font-poppins), ui-sans-serif, sans-serif",
+      "--ev-tracking": "0.02em",
+    },
+  },
+
   // Template for a warmer, softer event — paper background, rounded frames, no glitch.
   // Also useful for checking that the gallery really is theme-driven: point Tartarus at
   // this for a moment and the entire page, lightbox included, should restyle.

@@ -92,14 +92,31 @@ export default function ArchiveHub() {
             </Link>
           ))}
 
-          <div className="ar-row ar-sealed">
-            <span className="ar-mark" aria-hidden="true" />
-            <span>
-              <span className="ar-title">Classified</span>
-              <span className="ar-meta">Next event pending · if we told you, it wouldn’t be a surprise</span>
-            </span>
-            <span className="ar-go">Sealed</span>
-          </div>
+          {events
+            .filter((event) => event.upcoming && !rows.some((row) => row.slug === event.slug))
+            .map((event) => (
+              <Link
+                key={event.slug}
+                href={event.briefingHref || `/events#${event.slug}`}
+                className="ar-row ar-link"
+                style={event.theme.tokens}
+              >
+                <span className="ar-mark">
+                  {event.mark ? (
+                    <Image src={event.mark} alt={event.markAlt || ""} width={58} height={58} sizes="58px" />
+                  ) : (
+                    <span className="ar-wordmark">{event.title.slice(0, 2)}</span>
+                  )}
+                </span>
+                <span>
+                  <span className="ar-title">{event.title}</span>
+                  <span className="ar-meta">Upcoming · photos after the day</span>
+                </span>
+                <span className="ar-go">
+                  Brief <i>→</i>
+                </span>
+              </Link>
+            ))}
         </div>
       </section>
 
@@ -122,8 +139,8 @@ export default function ArchiveHub() {
             <Link className="transition-colors hover:text-blush" href="/">
               Back to the club site
             </Link>
-            <Link className="transition-colors hover:text-blush" href="/tartarus">
-              Tartarus briefing
+            <Link className="transition-colors hover:text-blush" href="/enclave">
+              Enclave briefing
             </Link>
             <span className="text-cream/45 sm:justify-self-end">© 2026 Neural Tech</span>
           </div>

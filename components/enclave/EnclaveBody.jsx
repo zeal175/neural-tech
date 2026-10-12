@@ -1,7 +1,6 @@
 "use client";
 
 import { EVENT } from "@/lib/enclave/event";
-import GlitchText from "./hero/GlitchText";
 import RevealCell from "./RevealCell";
 import SampleVideo from "./SampleVideo";
 
@@ -149,18 +148,6 @@ export default function EnclaveBody() {
               them — or use them against someone else. Every choice shows on the big screen.
             </p>
           </RevealCell>
-        </section>
-
-        {/* Decorative brand lock — Pillar + glitch; not a content headline */}
-        <section className="en-brand-lock" aria-hidden="true">
-          <GlitchText
-            text="ENCLAVE"
-            mode="idle"
-            cutIn
-            size={0.28}
-            className="en-brand-glitch"
-            style={{ width: "min(78vw, 520px)", marginInline: "auto" }}
-          />
         </section>
 
         <section className="en-facts-band" aria-label="Event details">

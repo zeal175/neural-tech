@@ -1532,19 +1532,6 @@ html.is-locked body {
   text-shadow: 0 0 0.12em rgb(251 117 88 / 0.45);
 }
 
-/* Decorative GlitchText + Pillar beat — atmosphere only */
-.en-brand-lock {
-  display: grid;
-  place-items: center;
-  padding: clamp(28px, 6vw, 64px) 0 clamp(12px, 3vw, 28px);
-  overflow: visible;
-}
-
-.en-brand-glitch {
-  overflow: visible;
-  pointer-events: none;
-}
-
 .en-credits-copy {
   display: grid;
   gap: 20px;

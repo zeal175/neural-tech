@@ -31,3 +31,10 @@ yarn-error.log*
 # typescript
 next-env.d.ts
 *.tsbuildinfo
+
+# unfinished UI experiments
+.scratch-ui/
+.tmp-nt-events.png
+
+public/enclave/videos/*.mov
+public/enclave/videos/*.MOV

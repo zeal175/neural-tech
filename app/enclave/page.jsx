@@ -1,7 +1,13 @@
-import { redirect } from "next/navigation";
+import Hero from "@/components/enclave/hero/Hero";
+import EnclaveBody from "@/components/enclave/EnclaveBody";
+import SiteNav from "@/components/enclave/SiteNav";
 
-const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL || "http://localhost:3001";
-
-export default function Enclave() {
-  redirect(ENCLAVE_URL);
+export default function Page() {
+  return (
+    <main>
+      <SiteNav />
+      <Hero />
+      <EnclaveBody />
+    </main>
+  );
 }

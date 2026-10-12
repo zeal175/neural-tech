@@ -14,9 +14,18 @@
   --color-coral: #315b8c;
   --color-orange: #315b8c;
   --color-line: rgba(65, 51, 51, 0.14);
+  /* Enclave accents (pages under /enclave override --color-ink on .enclave-root) */
+  --color-ember: #fb7558;
+  --color-ember-hot: #ff5524;
+  --color-ember-deep: #c81804;
+  --color-core: #ffc59a;
+  --color-ink-2: #010101;
+  --color-ghost-r: #ff3b2f;
+  --color-ghost-c: #7fd4ff;
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-screamer), var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-title: var(--font-pillar), var(--font-six-caps), var(--font-screamer), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-mono-jb), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 @layer base {

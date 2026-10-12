@@ -3,7 +3,7 @@
 
 import { themes } from "./themes";
 
-export const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL || "http://localhost:3001";
+export const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL || "/enclave";
 
 export const events = [
   {

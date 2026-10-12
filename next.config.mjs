@@ -12,6 +12,18 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        source: "/enclave/(models|textures)/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
+      },
+      {
+        source: "/enclave/videos/:path*",
+        headers: [{ key: "Cache-Control", value: "public, max-age=86400" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -3,33 +3,36 @@
 
 import { themes } from "./themes";
 
+export const ENCLAVE_URL = process.env.NEXT_PUBLIC_ENCLAVE_URL || "http://localhost:3001";
+
 export const events = [
   {
     slug: "enclave",
     title: "ENCLAVE",
     kicker: "Upcoming · live day",
-    date: "",
+    date: "2026-10-22",
     time: "",
-    venue: "",
+    venue: "Web Technology Lab",
     mark: "",
     markAlt: "The Enclave bust",
     featured: true,
     upcoming: true,
     short: "Enclave",
-    cover: "/enclave/cover.png",
-    coverWidth: 2160,
-    coverHeight: 2700,
+    cover: "/enclave/poster.jpg",
+    coverWidth: 833,
+    coverHeight: 1024,
+    coverRatio: "833 / 1024",
     blurb:
-      "The next live day. Not Tartarus — a different door. Solo or a team of two. One form, a pass each, QR at the door. Date soon. Crescent.",
+      "Find the exit. A maze, a rat, and instructions in plain English. You don’t need to know how to code — only how to think in steps. Solo or duo. ₹50. 60 seats.",
     beats: [
-      "Walk in alone, or as a pair.",
-      "One registration. A pass for each of you.",
-      "Show the QR. That’s the door.",
-      "Date and room still incoming.",
+      "Drag ten English blocks. Press Run. Watch the rat.",
+      "Round 1 scramble. Round 2 debug. Round 3, your own maze.",
+      "Start with 100 credits. Score and money.",
+      "What you spend them on is up to you.",
     ],
     tags: ["upcoming", "live day"],
     stats: [],
-    briefingHref: "/enclave",
+    briefingHref: ENCLAVE_URL,
     theme: themes.ember,
   },
   {

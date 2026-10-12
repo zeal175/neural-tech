@@ -31,8 +31,8 @@ export const themes = {
     },
   },
 
-  // Enclave: ink, ember, cream. Matches the standalone event site without
-  // borrowing Tartarus CRT or painting the club cream page.
+  // Enclave: ink / ember from the standalone event site (`enclave/`).
+  // Hover on /events only — the real Enclave page lives in that app.
   ember: {
     name: "ember",
     font: null,
@@ -46,7 +46,7 @@ export const themes = {
       "--ev-accent": "#f9725a",
       "--ev-accent-dim": "#c8321b",
       "--ev-accent-ink": "#070605",
-      "--ev-warn": "#8fa2c9",
+      "--ev-warn": "#c8321b",
       "--ev-radius": "0px",
       "--ev-display": "var(--font-screamer), ui-sans-serif, sans-serif",
       "--ev-display-weight": "700",

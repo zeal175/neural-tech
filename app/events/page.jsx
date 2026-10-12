@@ -4,7 +4,7 @@ import { HalftoneFlow } from "@/components/ui/halftone-flow";
 import SiteHeader from "../components/SiteHeader";
 import Reveal from "../components/Reveal";
 import LineReveal from "../components/LineReveal";
-import { events, formatEventDate } from "../gallery/events";
+import { ENCLAVE_URL, events, formatEventDate } from "../gallery/events";
 import { listPhotoFiles } from "../gallery/photos";
 import { allFontClasses } from "../gallery/fonts";
 import "./events.css";
@@ -85,7 +85,7 @@ export default function EventsPage() {
         const cells = ticketCells(event);
         const galleryHref = listPhotoFiles(event.slug).length ? `/gallery/${event.slug}` : null;
         const actionHref = event.upcoming && event.briefingHref ? event.briefingHref : galleryHref;
-        const actionLabel = event.upcoming ? "The briefing" : "See the photos";
+        const actionLabel = event.upcoming ? "Step inside" : "See the photos";
 
         return (
           <article
@@ -96,7 +96,10 @@ export default function EventsPage() {
           >
             <div className="ev-band-inner">
               {event.cover ? (
-                <figure className="ev-cover">
+                <figure
+                  className="ev-cover"
+                  style={event.coverRatio ? { aspectRatio: event.coverRatio } : undefined}
+                >
                   <Image
                     src={event.cover}
                     alt=""
@@ -191,8 +194,8 @@ export default function EventsPage() {
             <Link className="transition-colors hover:text-blush" href="/">
               Back to the club site
             </Link>
-            <Link className="transition-colors hover:text-blush" href="/enclave">
-              Enclave briefing
+            <Link className="transition-colors hover:text-blush" href={ENCLAVE_URL}>
+              Enclave
             </Link>
             <span className="text-cream/45 sm:justify-self-end">© 2026 Neural Tech</span>
           </div>

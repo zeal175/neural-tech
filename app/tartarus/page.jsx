@@ -131,7 +131,7 @@ function ChallengeCarousel() {
             }
           >
             {slide.sealed ? "Challenge 04 // sealed" : `Challenge ${slide.n}`}
-          </span>
+    </span>
           <GlitchText
             as="h3"
             className="t-display mt-5 mb-4 text-[clamp(2.6rem,8vw,5rem)] text-[var(--t-phosphor)]"
@@ -225,7 +225,7 @@ export default function TartarusPage() {
         <div className="relative z-50 hidden md:block">
           <a className="t-cta" href={ARCHIVE}>
             Photos
-          </a>
+        </a>
         </div>
 
         <button

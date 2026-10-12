@@ -113,7 +113,7 @@ export default function ArchiveHub() {
                   <span className="ar-meta">Upcoming · photos after the day</span>
                 </span>
                 <span className="ar-go">
-                  Brief <i>→</i>
+                  Step inside <i>→</i>
                 </span>
               </Link>
             ))}

@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts
+
+# env
+.env*
+!.env.example
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+
+# local registrations (personal data, dev only)
+data/
+
+# raw camera dumps (use the compressed sample-program.mp4 on the site)
+public/videos/Untitled.mov
+public/videos/*.mov
+public/videos/*.MOV
+
+# browser automation output
+.playwright-mcp/
+
+# blender working files (large / regenerable — site uses public/ assets)
+blender/source/
+blender/previews/
+blender/bakes/
+blender/export/
+blender/renders/
+blender/*.blend
+blender/*.blend1
+__pycache__/

@@ -1630,6 +1630,17 @@ html.is-locked body {
   background: #fff;
 }
 
+.reg-pay-qr-btn {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  text-align: center;
+}
+
 .reg-pay-qr img {
   display: block;
   width: 100%;
@@ -1638,9 +1649,60 @@ html.is-locked body {
   object-fit: contain;
 }
 
+.reg-pay-qr-hint {
+  font-family: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(7 6 5 / 0.55);
+}
+
 .reg-pay-qr code {
   font-size: 0.72rem;
   word-break: break-all;
+}
+
+.reg-qr-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.reg-qr-scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgb(0 0 0 / 0.88);
+  cursor: pointer;
+}
+
+.reg-qr-frame {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 420px);
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+}
+
+.reg-qr-frame img {
+  width: 100%;
+  max-height: min(72dvh, 420px);
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #fff;
+  padding: 18px;
+}
+
+.reg-qr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
 }
 
 .reg-pay-meta {

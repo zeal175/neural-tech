@@ -110,6 +110,7 @@ export default function RegisterForm() {
   const [proof, setProof] = useState(null);
   const [proofPreview, setProofPreview] = useState("");
   const [qrOk, setQrOk] = useState(true);
+  const [qrOpen, setQrOpen] = useState(false);
   const honeypot = useRef(null);
   const firstField = useRef(null);
   const fileInput = useRef(null);
@@ -128,6 +129,20 @@ export default function RegisterForm() {
     setProofPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [proof]);
+
+  useEffect(() => {
+    if (!qrOpen) return undefined;
+    const onKey = (e) => {
+      if (e.key === "Escape") setQrOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [qrOpen]);
 
   const update = (key, raw) => {
     const field = fieldByKey(key);
@@ -377,14 +392,22 @@ export default function RegisterForm() {
             <div className="reg-pay-grid">
               <div className="reg-pay-qr">
                 {qrOk ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={EVENT.upiQr}
-                    alt="UPI payment QR code"
-                    width={280}
-                    height={280}
-                    onError={() => setQrOk(false)}
-                  />
+                  <button
+                    type="button"
+                    className="reg-pay-qr-btn"
+                    onClick={() => setQrOpen(true)}
+                    aria-label="Open UPI QR full screen"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={EVENT.upiQr}
+                      alt="UPI payment QR code"
+                      width={280}
+                      height={280}
+                      onError={() => setQrOk(false)}
+                    />
+                    <span className="reg-pay-qr-hint">Tap to enlarge or save</span>
+                  </button>
                 ) : (
                   <p className="reg-error" role="alert">
                     Drop your UPI QR at <code>public/enclave/upi-qr.png</code>
@@ -404,8 +427,7 @@ export default function RegisterForm() {
             </div>
 
             <label className="reg-field reg-pay-upload" data-field="payment">
-              <span className="mono-label text-cream/55">Payment screenshot (required for new entries)</span>
-              <span className="reg-pay-hint">Use today’s payment screen — old screenshots are rejected.</span>
+              <span className="mono-label text-cream/55">Payment screenshot</span>
               <input
                 ref={fileInput}
                 type="file"
@@ -422,9 +444,7 @@ export default function RegisterForm() {
                     Change image
                   </button>
                 </div>
-              ) : (
-                <p className="reg-pay-hint">JPG / PNG / WEBP · max 5 MB</p>
-              )}
+              ) : null}
               {errors.payment ? (
                 <span className="reg-error" role="alert">
                   {errors.payment}
@@ -432,6 +452,25 @@ export default function RegisterForm() {
               ) : null}
             </label>
           </section>
+
+          {qrOpen && qrOk ? (
+            <div className="reg-qr-viewer" role="dialog" aria-modal="true" aria-label="UPI QR code">
+              <button type="button" className="reg-qr-scrim" aria-label="Close" onClick={() => setQrOpen(false)} />
+              <div className="reg-qr-frame">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={EVENT.upiQr} alt="UPI payment QR code" />
+                <div className="reg-qr-actions">
+                  <a className="cta" href={EVENT.upiQr} download="enclave-upi-qr.png" target="_blank" rel="noreferrer">
+                    Save QR
+                    <span className="cta-dot" />
+                  </a>
+                  <button type="button" className="pill-ghost" onClick={() => setQrOpen(false)}>
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <input ref={honeypot} name="company" tabIndex={-1} autoComplete="off" className="reg-hp" aria-hidden="true" />
 

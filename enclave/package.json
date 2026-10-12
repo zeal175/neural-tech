@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "echo 'Enclave is part of the club app now. From the repo root run: npm run dev  →  http://localhost:3000/enclave' && exit 1",
+    "build": "echo 'Build from the repo root: npm run build' && exit 1",
+    "start": "echo 'Start from the repo root: npm start' && exit 1",
     "model": "node scripts/optimize-model.mjs",
     "textures": "node scripts/textures.mjs",
     "pass-art": "node scripts/pass-art.mjs"

@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
+import { compressProof, MAX_PROOF_BYTES } from "@/lib/enclave/compressProof";
 import { DEPARTMENTS, EVENT, SECTIONS, WHEN_WHERE, YEARS } from "@/lib/enclave/event";
 import EnclavePass from "./EnclavePass";
 import { clearPass, loadPass, savePass } from "./passStorage";
@@ -154,18 +155,27 @@ export default function RegisterForm() {
     update(f.key, typing ? "" : value);
   };
 
-  const onProof = (file) => {
+  const onProof = async (file) => {
     if (!file) {
       setProof(null);
       setErrors((e) => ({ ...e, payment: "Upload a screenshot of your UPI payment." }));
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      setErrors((e) => ({ ...e, payment: "That image is too large (max 5 MB)." }));
-      return;
+    try {
+      const ready = await compressProof(file);
+      if (ready.size > MAX_PROOF_BYTES) {
+        setErrors((e) => ({ ...e, payment: "That image is too large (max 4 MB). Try a cropped screenshot." }));
+        return;
+      }
+      setProof(ready);
+      setErrors((e) => ({ ...e, payment: undefined }));
+    } catch (err) {
+      setProof(null);
+      setErrors((e) => ({
+        ...e,
+        payment: err?.message || "Couldn’t read that image. Try a JPG or PNG screenshot.",
+      }));
     }
-    setProof(file);
-    setErrors((e) => ({ ...e, payment: undefined }));
   };
 
   const focusField = (name) => {
@@ -215,6 +225,13 @@ export default function RegisterForm() {
         signal: AbortSignal.timeout?.(45000),
       });
       data = await res.json().catch(() => ({}));
+      if (res.status === 413) {
+        data = {
+          ok: false,
+          field: "payment",
+          error: "That screenshot is too large for upload. Try a cropped JPG under 4 MB.",
+        };
+      }
     } catch (err) {
       data = {
         ok: false,
@@ -246,6 +263,7 @@ export default function RegisterForm() {
         focusField(data.field);
       } else if (data.field === "payment") {
         setErrors({ payment: data.error });
+        fileInput.current?.scrollIntoView?.({ block: "center", behavior: "smooth" });
       } else setServerError(data.error || "Couldn’t send that. Try again.");
     }
   };

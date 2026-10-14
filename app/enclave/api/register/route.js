@@ -12,7 +12,7 @@ const YEAR_SET = new Set(YEARS);
 const hits = new Map();
 const LIMIT = 30;
 const ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
-const MAX_PROOF = 5 * 1024 * 1024;
+const MAX_PROOF = 4 * 1024 * 1024; // stay under Vercel’s ~4.5 MB request body cap
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"]);
 
 function clientIp(request) {
@@ -158,7 +158,7 @@ export async function POST(request) {
   if (!(proof instanceof File) || !proof.size) {
     return fail(400, "payment", "Upload a screenshot of your UPI payment.");
   }
-  if (proof.size > MAX_PROOF) return fail(400, "payment", "That image is too large (max 5 MB).");
+  if (proof.size > MAX_PROOF) return fail(400, "payment", "That image is too large (max 4 MB).");
   if (proof.type && !ALLOWED_TYPES.has(proof.type)) {
     return fail(400, "payment", "Use a JPG, PNG, or WEBP screenshot.");
   }

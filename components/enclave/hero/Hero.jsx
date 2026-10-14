@@ -81,6 +81,7 @@ export default function Hero() {
   const [glitchPlay, setGlitchPlay] = useState(false);
   const [inView, setInView] = useState(true);
   const [fine, setFine] = useState(false);
+  const [titleSize, setTitleSize] = useState(0.32);
   // the UI is painted from the first frame (under the opaque loader) but stays inert until the
   // intro takes over its visibility
   const [revealed, setRevealed] = useState(false);
@@ -88,6 +89,15 @@ export default function Hero() {
   const webgl = useHero((s) => s.webgl);
   const reducedMotion = useHero((s) => s.reducedMotion);
   const setHero = useHero((s) => s.set);
+
+  // Bigger wordmark scale on narrow screens (GlitchText size is relative to wrap width)
+  useEffect(() => {
+    const mq = matchMedia("(max-width: 767px)");
+    const sync = () => setTitleSize(mq.matches ? 0.4 : 0.32);
+    sync();
+    mq.addEventListener?.("change", sync);
+    return () => mq.removeEventListener?.("change", sync);
+  }, []);
 
   // ---- capabilities -> quality tier
   useEffect(() => {
@@ -160,8 +170,9 @@ export default function Hero() {
 
   // (the giant title is fitted to the stage in CSS: .hero-title in globals.css)
 
-  // ---- pointer: gaze target, custom cursor, parallax, clicks
+  // ---- pointer: gaze target, custom cursor, parallax, clicks (figure hero only)
   useEffect(() => {
+    if (!SHOW_FIGURE) return undefined;
     const stage = stageRef.current;
     const cursor = cursorRef.current;
     if (!stage || !cursor) return undefined;
@@ -179,29 +190,6 @@ export default function Hero() {
         inside: e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom,
       };
     };
-
-    // title mode: just the custom cursor (no figure charge / tilt)
-    if (!SHOW_FIGURE) {
-      const onMove = (e) => {
-        const p = toNdc(e);
-        Object.assign(live.pointer, p, { lastMove: performance.now() });
-        if (!live.pointer.fine) return;
-        curX(e.clientX);
-        curY(e.clientY);
-        cursor.style.opacity = p.inside ? "1" : "0";
-      };
-      const onLeave = () => {
-        live.pointer.inside = false;
-        cursor.style.opacity = "0";
-      };
-      window.addEventListener("pointermove", onMove, { passive: true });
-      document.documentElement.addEventListener("pointerleave", onLeave);
-      return () => {
-        window.removeEventListener("pointermove", onMove);
-        document.documentElement.removeEventListener("pointerleave", onLeave);
-        cursor.style.opacity = "0";
-      };
-    }
 
     const onMove = (e) => {
       const p = toNdc(e);
@@ -518,7 +506,7 @@ export default function Hero() {
     <section ref={heroRef} className={`hero${SHOW_FIGURE ? "" : " is-title"}`}>
       <div
         ref={stageRef}
-        className={`hero-stage ${fine ? "has-cursor" : ""}`}
+        className={`hero-stage${SHOW_FIGURE && fine ? " has-cursor" : ""}`}
         style={{ touchAction: "pan-y" }}
       >
         <div className="hero-bg" />
@@ -532,7 +520,7 @@ export default function Hero() {
               text={EVENT.name}
               mode="idle"
               play={glitchPlay}
-              size={0.3}
+              size={titleSize}
               className="hero-title hero-title-glitch"
             />
           )}
@@ -633,13 +621,15 @@ export default function Hero() {
         <Loader />
       </div>
 
-      <div ref={cursorRef} className="hero-cursor" aria-hidden="true">
-        <span className="hero-cursor-ring" />
-        <span className="hero-cursor-dot" />
-        <svg className="hero-cursor-charge" viewBox="0 0 52 52" aria-hidden="true">
-          <circle cx="26" cy="26" r="24" />
-        </svg>
-      </div>
+      {SHOW_FIGURE ? (
+        <div ref={cursorRef} className="hero-cursor" aria-hidden="true">
+          <span className="hero-cursor-ring" />
+          <span className="hero-cursor-dot" />
+          <svg className="hero-cursor-charge" viewBox="0 0 52 52" aria-hidden="true">
+            <circle cx="26" cy="26" r="24" />
+          </svg>
+        </div>
+      ) : null}
     </section>
   );
 }

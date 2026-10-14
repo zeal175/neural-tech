@@ -172,16 +172,6 @@ export default function EnclaveBody() {
             <a href={EVENT.registerUrl} className="en-exit-cta">
               Register →
             </a>
-            {EVENT.whatsappGroupUrl ? (
-              <a
-                href={EVENT.whatsappGroupUrl}
-                className="en-exit-wa"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Join WhatsApp
-              </a>
-            ) : null}
           </div>
           <p className="en-exit-note">
             {EVENT.club} · seats limited · experience needed: none

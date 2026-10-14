@@ -231,6 +231,11 @@ export default function RegisterForm() {
           field: "payment",
           error: "That screenshot is too large for upload. Try a cropped JPG under 4 MB.",
         };
+      } else if (res.status === 504) {
+        data = {
+          ok: false,
+          error: data.error || "The server timed out. Wait a moment and claim again — you won’t be registered twice.",
+        };
       }
     } catch (err) {
       data = {

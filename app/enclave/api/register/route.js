@@ -6,7 +6,7 @@ import { EVENT, YEARS } from "@/lib/enclave/event";
 import { checkPaymentImage } from "@/lib/enclave/payment-check";
 import { findEntryByRrn, savePaymentProof, saveRegistration } from "@/lib/enclave/save-registration";
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const YEAR_SET = new Set(YEARS);
 const hits = new Map();

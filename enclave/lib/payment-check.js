@@ -121,7 +121,14 @@ export async function checkPaymentImage(bytes, { feeAmount = "50" } = {}) {
     return { ok: false, error: "That image looks blank. Upload a clear payment screenshot." };
   }
 
-  // Soft OCR (timeout): date + amount. Missing text = warning, not a hard fail.
+  // Soft OCR is opt-in (ENCLAVE_PAYMENT_OCR=1). Tesseract cold-starts blow Vercel’s
+  // function budget and caused 504s for students — sharp checks above are enough to gate junk files.
+  const ocrOn = process.env.ENCLAVE_PAYMENT_OCR === "1";
+  if (!ocrOn) {
+    notes.push("ocr-off");
+    return { ok: true, notes };
+  }
+
   let ocrText = "";
   try {
     const { createWorker } = await import("tesseract.js");
@@ -133,16 +140,19 @@ export async function checkPaymentImage(bytes, { feeAmount = "50" } = {}) {
       .png()
       .toBuffer();
 
-    const worker = await createWorker("eng", 1, { logger: () => {} });
-    const raced = Promise.race([
-      worker.recognize(resized).then((r) => r.data.text || ""),
-      new Promise((_, rej) => setTimeout(() => rej(new Error("ocr-timeout")), 12000)),
+    // Race includes worker boot — createWorker alone can hang downloading traineddata.
+    ocrText = await Promise.race([
+      (async () => {
+        const worker = await createWorker("eng", 1, { logger: () => {} });
+        try {
+          const r = await worker.recognize(resized);
+          return r.data.text || "";
+        } finally {
+          await worker.terminate().catch(() => {});
+        }
+      })(),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("ocr-timeout")), 8000)),
     ]);
-    try {
-      ocrText = await raced;
-    } finally {
-      await worker.terminate().catch(() => {});
-    }
   } catch {
     notes.push("ocr-skipped");
   }
@@ -157,7 +167,6 @@ export async function checkPaymentImage(bytes, { feeAmount = "50" } = {}) {
       const newest = dates.reduce((a, b) => (a > b ? a : b));
       const day = startOfDay(newest);
       if (day > today) {
-        // OCR misread as future — don't block
         notes.push("date-future-ignored");
       } else if (day < oldestOk) {
         return {

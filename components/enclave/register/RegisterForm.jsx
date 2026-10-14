@@ -406,7 +406,6 @@ export default function RegisterForm() {
                 ref={fileInput}
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                capture="environment"
                 required={!proof}
                 aria-required="true"
                 onChange={(e) => onProof(e.target.files?.[0] || null)}

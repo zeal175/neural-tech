@@ -4,7 +4,7 @@ import { EVENT } from "@/lib/enclave/event";
 
 export const metadata = {
   title: `Register — ${EVENT.name}`,
-  description: `Register for ${EVENT.name}. Fee ${EVENT.fee}. Solo or duo. Pay via UPI and get your entry pass.`,
+  description: `Register for ${EVENT.name}. Fee ${EVENT.fee}. Solo or duo — register individually; teams are formed on the day. Pay via UPI and get your entry pass.`,
 };
 
 export default function RegisterPage() {

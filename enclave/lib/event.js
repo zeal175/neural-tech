@@ -41,8 +41,9 @@ export const EVENT = {
   department: "Department of CSE",
   institution: "Crescent Institute",
   club: "Neural Techgenix Club",
-  // entries are one person, or a team of two (one form, a pass each)
+  // Solo or duo; register individually — teams are formed on the day
   format: "Solo or duo",
+  formatNote: "Register individually — teams are formed on the day.",
   seats: "60 only",
   fee: "₹50",
   prize: "₹2,000",

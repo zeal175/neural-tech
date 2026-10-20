@@ -299,7 +299,7 @@ export default function RegisterForm() {
         <p className="en-kicker">Registration</p>
         <h1 className="en-display reg-page-title">{EVENT.name}</h1>
         <p className="en-copy reg-page-lead">
-          {WHEN_WHERE} · {EVENT.fee}
+          {WHEN_WHERE} · {EVENT.fee}. Solo or duo — register individually; teams are formed on the day.
         </p>
       </header>
 

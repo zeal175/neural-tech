@@ -55,6 +55,8 @@ const FACTS = [
   ["Prize", EVENT.prize],
 ];
 
+const TEAM_LINE = EVENT.formatNote || "Register individually — teams are formed on the day.";
+
 export default function EnclaveBody() {
   return (
     <>
@@ -156,6 +158,7 @@ export default function EnclaveBody() {
               <div key={label} className="en-fact">
                 <p className="en-kicker">{label}</p>
                 <p className="en-fact-val">{value}</p>
+                {label === "Teams" ? <p className="en-fact-note">{TEAM_LINE}</p> : null}
               </div>
             ))}
           </RevealCell>
@@ -174,7 +177,7 @@ export default function EnclaveBody() {
             </a>
           </div>
           <p className="en-exit-note">
-            {EVENT.club} · seats limited · experience needed: none
+            {EVENT.club} · solo or duo · register alone · teamed on the day
           </p>
         </div>
       </RevealCell>

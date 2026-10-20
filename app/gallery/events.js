@@ -27,7 +27,7 @@ export const events = [
     coverHeight: 1024,
     coverRatio: "833 / 1024",
     blurb:
-      "Find the exit. A maze, a rat, and instructions in plain English. You don’t need to know how to code — only how to think in steps. Solo or duo. ₹50. 60 seats.",
+      "Find the exit. A maze, a rat, and instructions in plain English. You don’t need to know how to code — only how to think in steps. Solo or duo — register individually; teams are formed on the day. ₹50. 60 seats.",
     beats: [
       "Drag ten English blocks. Press Run. Watch the rat.",
       "Round 1 scramble. Round 2 debug. Round 3, your own maze.",

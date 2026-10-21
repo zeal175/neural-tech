@@ -1,8 +1,8 @@
 "use client";
 
-// Event-day door scanner for organizers (/checkin). Scan a pass QR -> the person is marked
-// present in the attendance sheet. Search covers lost passes; "No pass" covers Google Form
-// registrants and walk-ins. Every call carries the organizer PIN (CHECKIN_PIN).
+// Event-day door scanner for organizers (/enclave/checkin). Scan a pass QR (ENCLAVE:ENC-…)
+// → row in Supabase `enclave_attendance` (or Sheet / local CSV). Search covers lost passes;
+// "No pass" covers walk-ins. Every call carries the organizer PIN (CHECKIN_PIN).
 import { useCallback, useEffect, useRef, useState } from "react";
 import { YEARS } from "@/lib/enclave/event";
 

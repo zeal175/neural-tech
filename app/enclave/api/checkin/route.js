@@ -99,8 +99,15 @@ export async function POST(request) {
         return fail(400, "Unknown action.");
     }
   } catch (error) {
-    if (error.message === "unconfigured") return fail(503, "The Google Sheet isn’t connected (REGISTRATIONS_WEBHOOK_URL).");
-    if (error.message === "timeout") return fail(504, "The sheet is slow right now. Try again.");
-    return fail(502, "Couldn’t reach the sheet. Try again.");
+    if (error.message === "unconfigured") {
+      return fail(
+        503,
+        "Check-in isn’t connected. Add Supabase (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY) or REGISTRATIONS_WEBHOOK_URL.",
+      );
+    }
+    if (error.message === "timeout") return fail(504, "Attendance is slow right now. Try again.");
+    if (error.message === "supabase") return fail(502, "Couldn’t reach the attendance database. Try again.");
+    console.error("checkin failed", error);
+    return fail(502, "Couldn’t save attendance. Try again.");
   }
 }

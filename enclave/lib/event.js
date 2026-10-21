@@ -23,7 +23,7 @@ const SETTINGS = {
   upiAmount: "50",
   // the Department and Section dropdowns on the form, in this order. Each list also gets an
   // "Other" choice that lets people type their own.
-  departments: ["CSE", "IT", "AI & DS", "CSE (AI & ML)", "CSE (Cyber Security)", "ECE", "EEE", "EIE", "MECH", "CIVIL", "AUTO", "AERO", "BIOTECH"],
+  departments: ["CSE", "IT", "AI & DS", "CSE (AI & ML)", "CSE (Cyber Security)", "IOT", "ECE", "EEE", "EIE", "MECH", "CIVIL", "AUTO", "AERO", "BIOTECH"],
   sections: ["A", "B", "C", "D", "E", "F", "G", "H"],
 };
 // ─────────────────────────────────────────────────────────────────────────────────────────────

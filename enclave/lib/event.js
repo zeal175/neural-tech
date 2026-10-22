@@ -14,7 +14,7 @@ const SETTINGS = {
   // fallback if the on-site form is down, e.g. "https://forms.gle/...". "" hides it.
   googleFormUrl: "",
   // false closes registrations (the form then says so)
-  registrationOpen: true,
+  registrationOpen: false,
   // UPI: drop your QR image at public/upi-qr.png (or set NEXT_PUBLIC_UPI_QR).
   // Optional VPA / amount for the copy under the code.
   upiQr: "/upi-qr.png",

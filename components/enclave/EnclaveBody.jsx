@@ -3,6 +3,7 @@
 import { EVENT } from "@/lib/enclave/event";
 import RevealCell from "./RevealCell";
 import SampleVideo from "./SampleVideo";
+import EnclaveGallery from "./EnclaveGallery";
 
 const BLOCKS = [
   {
@@ -57,7 +58,7 @@ const FACTS = [
 
 const TEAM_LINE = EVENT.formatNote || "Register individually — teams are formed on the day.";
 
-export default function EnclaveBody() {
+export default function EnclaveBody({ photos = [] }) {
   return (
     <>
       <div className="en-page">
@@ -164,6 +165,8 @@ export default function EnclaveBody() {
           </RevealCell>
         </section>
       </div>
+
+      <EnclaveGallery photos={photos} />
 
       <RevealCell dir="flood" delay={0} as="section" className="en-exit">
         <div className="en-exit-inner">

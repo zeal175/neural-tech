@@ -236,9 +236,9 @@
 .ev-band:focus-visible .ev-title,
 .ev-band:focus-within .ev-title {
   color: var(--ev-accent);
-  font-family: var(--ev-display, var(--font-display));
-  font-weight: var(--ev-display-weight, 700);
-  letter-spacing: var(--ev-tracking, 0.02em);
+  font-family: var(--font-pillar), var(--font-screamer), ui-sans-serif, sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.04em;
 }
 
 .ev-band:hover .ev-blurb,

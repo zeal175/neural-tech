@@ -7,6 +7,8 @@ import fs from "node:fs";
 import path from "node:path";
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".gif"]);
+// Cover/mark assets dropped in the event folder — keep out of the photo wall.
+const SKIP_FILES = new Set(["image.jpeg", "image.jpg", "image.png", "logo.png", "logo.jpg", "mark.png"]);
 const SAFE_SLUG = /^[a-z0-9][a-z0-9-]*$/i;
 const HEADER_BYTES = 512 * 1024;
 
@@ -169,6 +171,7 @@ export function listPhotoFiles(slug) {
       .filter((entry) => entry.isFile() && !entry.name.startsWith("."))
       .map((entry) => entry.name)
       .filter((name) => IMAGE_EXTENSIONS.has(path.extname(name).toLowerCase()))
+      .filter((name) => !SKIP_FILES.has(name.toLowerCase()))
       .sort(naturalCompare);
   } catch {
     // Folder not created yet — the page renders its empty state instead.

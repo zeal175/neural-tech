@@ -124,14 +124,20 @@
   line-height: 1.08;
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  transition: color 380ms ease-out;
+  transition:
+    color 380ms ease-out,
+    font-family 380ms ease-out,
+    font-weight 380ms ease-out,
+    letter-spacing 380ms ease-out,
+    font-size 380ms ease-out;
 }
 
 .ar-link:hover .ar-title,
 .ar-link:focus-visible .ar-title {
-  font-family: var(--ev-display);
-  font-weight: var(--ev-display-weight, 400);
-  letter-spacing: var(--ev-tracking, 0.02em);
+  font-family: var(--font-pillar), var(--font-screamer), ui-sans-serif, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 4.6vw, 2.85rem);
+  letter-spacing: 0.04em;
   color: var(--ev-accent);
 }
 

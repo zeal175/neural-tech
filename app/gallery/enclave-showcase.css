@@ -1,0 +1,95 @@
+/* /gallery/enclave — dark neon showcase; list is the hero */
+
+.enc-show {
+  --enc-ink: #f5ebdd;
+  --enc-dim: rgb(245 235 221 / 0.62);
+  --enc-ember: #f9725a;
+  --enc-teal: #3ec9c9;
+  --enc-bg: #050403;
+  min-height: 100svh;
+  background:
+    radial-gradient(ellipse 70% 45% at 70% 18%, rgb(249 114 90 / 0.18), transparent 55%),
+    radial-gradient(ellipse 55% 40% at 18% 28%, rgb(62 201 201 / 0.1), transparent 50%),
+    linear-gradient(180deg, #0a0807 0%, var(--enc-bg) 42%, #070605 100%);
+  color: var(--enc-ink);
+  color-scheme: dark;
+  display: flex;
+  flex-direction: column;
+}
+
+.enc-show-nav {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: max(0.85rem, env(safe-area-inset-top)) clamp(18px, 4vw, 40px) 0.85rem;
+  background: linear-gradient(180deg, rgb(5 4 3 / 0.92), rgb(5 4 3 / 0.55) 70%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.enc-show-back,
+.enc-show-brief {
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.88rem;
+  letter-spacing: 0.02em;
+  color: var(--enc-dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.enc-show-back:hover,
+.enc-show-brief:hover,
+.enc-show-back:focus-visible,
+.enc-show-brief:focus-visible {
+  color: var(--enc-ember);
+  outline: none;
+}
+
+.enc-show .en-gallery-page {
+  flex: 1;
+  border-top: none;
+  border-bottom: none;
+  background: transparent;
+  padding-block: 0 24px;
+}
+
+.enc-show-foot {
+  display: grid;
+  gap: 28px;
+  padding: clamp(40px, 7vw, 72px) clamp(18px, 4vw, 40px) max(2rem, env(safe-area-inset-bottom));
+  border-top: 1px solid rgb(245 235 221 / 0.1);
+}
+
+.enc-show-logo {
+  width: min(100%, 200px);
+  height: auto;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
+.enc-show-foot-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 28px;
+  padding-top: 20px;
+  border-top: 1px solid rgb(245 235 221 / 0.1);
+  font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: rgb(245 235 221 / 0.45);
+}
+
+.enc-show-foot-links a {
+  color: rgb(245 235 221 / 0.72);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.enc-show-foot-links a:hover,
+.enc-show-foot-links a:focus-visible {
+  color: var(--enc-ember);
+  outline: none;
+}

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import SiteHeader from "../../components/SiteHeader";
 import EventPhotos from "../EventPhotos";
+import EnclaveShowcase from "../EnclaveShowcase";
 import { events, getEvent } from "../events";
 import { readPhotos } from "../photos";
 
@@ -20,6 +21,10 @@ export default async function EventGalleryPage({ params }) {
   if (!event) notFound();
 
   const photos = readPhotos(event.slug, event.title);
+
+  if (slug === "enclave") {
+    return <EnclaveShowcase event={event} photos={photos} />;
+  }
 
   return (
     <main className="bg-cream text-soil">

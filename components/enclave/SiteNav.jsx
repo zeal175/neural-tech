@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 
-const NAV_EXTRAS = [
-  ["/enclave", "Entrance"],
-  ["/", "Club site"],
-];
-
 export default function SiteNav() {
   const pathname = usePathname();
   const onLanding = pathname === "/enclave" || pathname === "/enclave/";
   const onRegister = pathname.startsWith("/enclave/register");
+  const navExtras = [
+    ["/enclave", "Entrance"],
+    [onLanding ? "#gallery" : "/enclave#gallery", "Gallery"],
+    ["/", "Club site"],
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
   const [pastHero, setPastHero] = useState(!onLanding);
   const [glitchIn, setGlitchIn] = useState(false);
@@ -80,9 +80,9 @@ export default function SiteNav() {
           </a>
 
           <nav className="en-nav-links" aria-label="Site">
-            {NAV_EXTRAS.map(([href, label], i) => (
+            {navExtras.map(([href, label], i) => (
               <a
-                key={href}
+                key={label}
                 href={href}
                 className="en-nav-extra"
                 style={{ "--en-nav-i": i }}

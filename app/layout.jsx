@@ -15,6 +15,13 @@ const screamer = localFont({
   display: "swap",
 });
 
+const pillar = localFont({
+  src: "./fonts/Pillar.otf",
+  weight: "400",
+  variable: "--font-pillar",
+  display: "swap",
+});
+
 const siteName = "Neural Tech";
 const title = "Neural Tech — Not Your Average Tech Club";
 const description =
@@ -60,7 +67,7 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${screamer.variable}`}>
+    <html lang="en" className={`${poppins.variable} ${screamer.variable} ${pillar.variable}`}>
       <body>{children}</body>
     </html>
   );

@@ -5,8 +5,8 @@ const nextConfig = {
   // requires every quality value in use to be declared here.
   images: {
     formats: ["image/avif", "image/webp"],
-    qualities: [55, 60, 75, 82, 88],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    qualities: [55, 60, 72, 75, 82, 88, 90, 92],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920],
     imageSizes: [96, 128, 256, 384, 480],
     remotePatterns: [
       {

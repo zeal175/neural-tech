@@ -6,6 +6,7 @@
  * Expand is a fixed overlay so closing restores the exact scroll position.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Download, X, ChevronLeft, ChevronRight } from "lucide-react";
@@ -39,7 +40,8 @@ const THUMB_SIZES =
   "(max-width: 560px) 50vw, (max-width: 800px) 33vw, (max-width: 1100px) 25vw, 20vw";
 const THUMB_QUALITY = 55;
 const SHARP_SIZES = "100vw";
-const SHARP_QUALITY = 92;
+const SHARP_QUALITY = 88;
+const FRAME_QUALITY = 75;
 const INITIAL_BATCH = 36;
 const LOAD_BATCH = 28;
 const STRIP_WINDOW = 12;
@@ -47,7 +49,6 @@ const AHEAD_COUNT = 12;
 /** px/ms — above this we wait; above rush we skip forced preload */
 const SCROLL_BUSY = 1.4;
 const SCROLL_RUSH = 3.2;
-const spring = { type: "spring", stiffness: 320, damping: 34, mass: 0.85 };
 
 const warmed = new Set();
 const thumbsWarmed = new Set();
@@ -148,20 +149,37 @@ function packColumns(items, columnCount) {
   return columns.map((c) => c.items);
 }
 
-function LightboxSharp({ src }) {
-  const [ready, setReady] = useState(false);
+function ExpandPhoto({ image }) {
+  const [sharpReady, setSharpReady] = useState(false);
+  const w = image.width || 1600;
+  const h = image.height || 1200;
+
   return (
-    <Image
-      src={src}
-      alt=""
-      fill
-      sizes={SHARP_SIZES}
-      quality={SHARP_QUALITY}
-      priority
-      draggable={false}
-      onLoad={() => setReady(true)}
-      className={`en-gal-sharp${ready ? " is-ready" : ""}`}
-    />
+    <div className="en-gal-expand-hero">
+      <Image
+        src={image.src}
+        alt={image.alt || "Selected photo"}
+        width={w}
+        height={h}
+        sizes={SHARP_SIZES}
+        quality={FRAME_QUALITY}
+        priority
+        className="en-gal-frame-img"
+        draggable={false}
+      />
+      <Image
+        src={image.src}
+        alt=""
+        width={w}
+        height={h}
+        sizes={SHARP_SIZES}
+        quality={SHARP_QUALITY}
+        priority
+        draggable={false}
+        onLoad={() => setSharpReady(true)}
+        className={`en-gal-sharp${sharpReady ? " is-ready" : ""}`}
+      />
+    </div>
   );
 }
 
@@ -372,27 +390,15 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
         </div>
       </div>
 
-      <div className="en-gal-expand-body">
-        <motion.div
-          key={image.id}
-          className="en-gal-expand-hero"
-          initial={reduceMotion ? false : { opacity: 0.55, scale: 0.985 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={spring}
-        >
-          <Image
-            src={image.src}
-            alt={image.alt || "Selected photo"}
-            fill
-            sizes={SHARP_SIZES}
-            quality={72}
-            priority
-            className="en-gal-frame-img"
-            draggable={false}
-          />
-          <LightboxSharp key={image.id} src={image.src} />
-        </motion.div>
-      </div>
+      <motion.div
+        key={image.id}
+        className="en-gal-expand-body"
+        initial={reduceMotion ? false : { opacity: 0.7 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.2 }}
+      >
+        <ExpandPhoto image={image} />
+      </motion.div>
 
       <div className="en-gal-expand-strip" aria-label="Nearby photos">
         {stripIndexes.map((i) => {
@@ -448,6 +454,11 @@ export default function EnclaveGallery({
   const visibleCountRef = useRef(INITIAL_BATCH);
   const expanded = selectedIndex != null;
   const isPage = variant === "page";
+  const [portalReady, setPortalReady] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
 
   const items = useMemo(() => {
     const list = photos.length
@@ -620,26 +631,31 @@ export default function EnclaveGallery({
         </div>
       </div>
 
-      <AnimatePresence>
-        {expanded ? (
-          <motion.div
-            key="expand"
-            className="en-gal-lightbox"
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-          >
-            <ExpandView
-              items={items}
-              index={selectedIndex}
-              onIndex={setSelectedIndex}
-              onClose={closeExpand}
-              reduceMotion={reduceMotion}
-            />
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {portalReady
+        ? createPortal(
+            <AnimatePresence>
+              {expanded ? (
+                <motion.div
+                  key="expand"
+                  className="en-gal-lightbox"
+                  initial={reduceMotion ? false : { opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.18 }}
+                >
+                  <ExpandView
+                    items={items}
+                    index={selectedIndex}
+                    onIndex={setSelectedIndex}
+                    onClose={closeExpand}
+                    reduceMotion={reduceMotion}
+                  />
+                </motion.div>
+              ) : null}
+            </AnimatePresence>,
+            document.body,
+          )
+        : null}
     </section>
   );
 }

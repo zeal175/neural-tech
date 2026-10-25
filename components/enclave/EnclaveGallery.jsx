@@ -3,11 +3,12 @@
 /**
  * Enclave gallery — Pinterest grid + expand.
  * Tuned for large sets: progressive mount, lazy thumbs, windowed strip.
+ * Expand is a fixed overlay so closing restores the exact scroll position.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Download } from "lucide-react";
+import { Download, X, ChevronLeft, ChevronRight } from "lucide-react";
 import "./enclave-gallery.css";
 
 const FALLBACK = [
@@ -37,8 +38,8 @@ const FALLBACK = [
 const THUMB_SIZES =
   "(max-width: 560px) 50vw, (max-width: 800px) 33vw, (max-width: 1100px) 25vw, 20vw";
 const THUMB_QUALITY = 55;
-const SHARP_SIZES = "(max-width: 640px) 100vw, 960px";
-const SHARP_QUALITY = 82;
+const SHARP_SIZES = "100vw";
+const SHARP_QUALITY = 92;
 const INITIAL_BATCH = 36;
 const LOAD_BATCH = 28;
 const STRIP_WINDOW = 12;
@@ -60,7 +61,7 @@ function prefetchSharp(src) {
   warmed.add(src);
   const img = new window.Image();
   img.decoding = "async";
-  img.src = imageOptimizerUrl(src, 1080, SHARP_QUALITY);
+  img.src = imageOptimizerUrl(src, 1920, SHARP_QUALITY);
 }
 
 /** Warm the next thumbs at normal priority — never rush. */
@@ -81,24 +82,31 @@ function fileNameFromSrc(src) {
   }
 }
 
+/** Always fetch the public original path — never /_next/image. */
 async function downloadOriginal(src) {
   const name = fileNameFromSrc(src);
+  const absolute =
+    typeof window !== "undefined" && src.startsWith("/")
+      ? `${window.location.origin}${src}`
+      : src;
   try {
-    const response = await fetch(src);
+    const response = await fetch(absolute, { cache: "force-cache", credentials: "same-origin" });
     if (!response.ok) throw new Error("download failed");
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
     link.download = name;
+    link.rel = "noopener";
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1500);
   } catch {
     const link = document.createElement("a");
-    link.href = src;
+    link.href = absolute;
     link.download = name;
+    link.target = "_blank";
     link.rel = "noopener";
     document.body.appendChild(link);
     link.click();
@@ -230,14 +238,7 @@ function Tile({ image, priority, reduceMotion, staggerMs = 0, onOpen }) {
 function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
   const image = items[index];
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
+  const touchRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     const onKey = (e) => {
@@ -282,7 +283,22 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
     }
   };
 
-  // Only mount nearby strip thumbs (circular window).
+  const onTouchStart = (e) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    touchRef.current = { x: t.clientX, y: t.clientY };
+  };
+
+  const onTouchEnd = (e) => {
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const dx = t.clientX - touchRef.current.x;
+    const dy = t.clientY - touchRef.current.y;
+    if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) onIndex((index + 1) % items.length);
+    else onIndex((index - 1 + items.length) % items.length);
+  };
+
   const stripIndexes = useMemo(() => {
     const out = [];
     const n = items.length;
@@ -294,7 +310,14 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
   }, [index, items.length]);
 
   return (
-    <div className="en-gal-expand" role="dialog" aria-modal="true" aria-label={image.alt || "Photo"}>
+    <div
+      className="en-gal-expand"
+      role="dialog"
+      aria-modal="true"
+      aria-label={image.alt || "Photo"}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
       <motion.button
         type="button"
         className="en-gal-expand-scrim"
@@ -302,77 +325,74 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
         initial={reduceMotion ? false : { opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.25 }}
+        transition={{ duration: 0.2 }}
         onClick={onClose}
       />
 
-      <div className="en-gal-expand-body">
-        <div className="en-gal-expand-hero">
-          <motion.div
-            key={image.id}
-            className="en-gal-media en-gal-expand-frame"
-            style={{ aspectRatio: `${image.width || 3} / ${image.height || 4}` }}
-            initial={reduceMotion ? false : { opacity: 0.6, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={spring}
+      <div className="en-gal-expand-chrome">
+        <p className="en-gal-expand-count">
+          {index + 1} / {items.length}
+        </p>
+        <div className="en-gal-expand-actions">
+          <button
+            type="button"
+            onClick={() => onIndex((index - 1 + items.length) % items.length)}
+            aria-label="Previous photo"
           >
-            <Image
-              src={image.src}
-              alt={image.alt || "Selected photo"}
-              fill
-              sizes="(max-width: 900px) 92vw, 42vw"
-              quality={THUMB_QUALITY}
-              priority
-              className="en-gal-frame-img"
-              draggable={false}
-            />
-            <LightboxSharp key={image.id} src={image.src} />
-          </motion.div>
+            <ChevronLeft size={22} strokeWidth={2} aria-hidden="true" />
+            <span>Prev</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => onIndex((index + 1) % items.length)}
+            aria-label="Next photo"
+          >
+            <span>Next</span>
+            <ChevronRight size={22} strokeWidth={2} aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            onClick={onDownload}
+            disabled={saving}
+            aria-busy={saving}
+            aria-label="Download original photo"
+          >
+            <Download size={18} aria-hidden="true" />
+            <span>{saving ? "…" : "Save"}</span>
+          </button>
+          <button type="button" className="en-gal-expand-close" onClick={onClose} aria-label="Close">
+            <X size={22} strokeWidth={2} aria-hidden="true" />
+            <span>Close</span>
+          </button>
         </div>
+      </div>
 
+      <div className="en-gal-expand-body">
         <motion.div
-          className="en-gal-expand-meta"
-          initial={reduceMotion ? false : { opacity: 0, x: 16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.08, duration: 0.35 }}
+          key={image.id}
+          className="en-gal-expand-hero"
+          initial={reduceMotion ? false : { opacity: 0.55, scale: 0.985 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={spring}
         >
-          <div className="en-gal-expand-actions">
-            <button
-              type="button"
-              onClick={() => onIndex((index - 1 + items.length) % items.length)}
-              aria-label="Previous photo"
-            >
-              Prev
-            </button>
-            <button
-              type="button"
-              onClick={() => onIndex((index + 1) % items.length)}
-              aria-label="Next photo"
-            >
-              Next
-            </button>
-            <button type="button" onClick={onClose} aria-label="Close">
-              Close
-            </button>
-            <button
-              type="button"
-              onClick={onDownload}
-              disabled={saving}
-              aria-busy={saving}
-              aria-label="Download original photo"
-            >
-              <Download size={14} /> Save
-            </button>
-          </div>
+          <Image
+            src={image.src}
+            alt={image.alt || "Selected photo"}
+            fill
+            sizes={SHARP_SIZES}
+            quality={72}
+            priority
+            className="en-gal-frame-img"
+            draggable={false}
+          />
+          <LightboxSharp key={image.id} src={image.src} />
         </motion.div>
       </div>
 
-      <div className="en-gal-expand-strip">
+      <div className="en-gal-expand-strip" aria-label="Nearby photos">
         {stripIndexes.map((i) => {
           const item = items[i];
           const active = i === index;
-          const w = item.width || 3;
-          const h = item.height || 4;
           return (
             <button
               key={`${item.id}-${i}`}
@@ -383,23 +403,23 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
               aria-label={item.alt || `Photo ${i + 1}`}
               aria-current={active ? "true" : undefined}
             >
-              {active ? (
-                <span className="en-gal-expand-thumb-spacer" style={{ aspectRatio: `${w} / ${h}` }} />
-              ) : (
-                <span className="en-gal-media en-gal-expand-thumb-media" style={{ aspectRatio: `${w} / ${h}` }}>
+              <span className="en-gal-media en-gal-expand-thumb-media">
+                {active ? (
+                  <span className="en-gal-expand-thumb-spacer" aria-hidden="true" />
+                ) : (
                   <Image
                     src={item.src}
                     alt=""
                     fill
-                    sizes="72px"
+                    sizes="104px"
                     quality={THUMB_QUALITY}
                     loading="lazy"
                     decoding="async"
                     className="en-gal-tile-img"
                     draggable={false}
                   />
-                </span>
-              )}
+                )}
+              </span>
             </button>
           );
         })}
@@ -419,6 +439,7 @@ export default function EnclaveGallery({
   const sentinelRef = useRef(null);
   const gridRef = useRef(null);
   const scrollVelRef = useRef(0);
+  const scrollYRef = useRef(0);
   const itemsRef = useRef([]);
   const visibleCountRef = useRef(INITIAL_BATCH);
   const expanded = selectedIndex != null;
@@ -455,7 +476,6 @@ export default function EnclaveGallery({
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries.some((e) => e.isIntersecting)) return;
-        // Fast scroll: still mount more, but don't rush a big batch.
         const rush = scrollVelRef.current >= SCROLL_RUSH;
         const step = rush ? Math.min(8, LOAD_BATCH) : LOAD_BATCH;
         setVisibleCount((n) => Math.min(itemsRef.current.length, n + step));
@@ -466,7 +486,6 @@ export default function EnclaveGallery({
     return () => io.disconnect();
   }, [hasMore, expanded, visibleCount]);
 
-  // Calm ahead-of-scroll: warm the next 4 thumbs. Fast scroll → wait / skip rush.
   useEffect(() => {
     if (expanded || typeof window === "undefined") return undefined;
 
@@ -509,7 +528,6 @@ export default function EnclaveGallery({
       window.clearTimeout(timer);
       const v = scrollVelRef.current;
       if (v >= SCROLL_RUSH) {
-        // Still flying — don't force preload; browser lazy load is fine.
         timer = window.setTimeout(scheduleWarm, 220);
         return;
       }
@@ -540,7 +558,30 @@ export default function EnclaveGallery({
     };
   }, [expanded]);
 
+  // Lock body scroll while open; restore exact Y on close.
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const y = scrollYRef.current;
+    const { style } = document.body;
+    const prevOverflow = style.overflow;
+    const prevPosition = style.position;
+    const prevTop = style.top;
+    const prevWidth = style.width;
+    style.overflow = "hidden";
+    style.position = "fixed";
+    style.top = `-${y}px`;
+    style.width = "100%";
+    return () => {
+      style.overflow = prevOverflow;
+      style.position = prevPosition;
+      style.top = prevTop;
+      style.width = prevWidth;
+      window.scrollTo(0, y);
+    };
+  }, [expanded]);
+
   const openAt = useCallback((index) => {
+    scrollYRef.current = window.scrollY || window.pageYOffset || 0;
     setSelectedIndex(index);
   }, []);
 
@@ -556,50 +597,54 @@ export default function EnclaveGallery({
     >
       <div className="en-gallery-inner">
         <div className={`en-gal-stage-wrap${expanded ? " is-expand" : ""}`}>
-          <AnimatePresence mode="wait">
-            {expanded ? (
-              <motion.div
-                key="expand"
-                className="en-gal-view en-gal-view-expand"
-                initial={reduceMotion ? false : { opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <ExpandView
-                  items={items}
-                  index={selectedIndex}
-                  onIndex={setSelectedIndex}
-                  onClose={closeExpand}
-                  reduceMotion={reduceMotion}
-                />
-              </motion.div>
-            ) : (
-              <div key="grid" className="en-gal-view en-gal-view-grid">
-                <div ref={gridRef} className="en-gal-grid" aria-label="Photo wall">
-                  {columns.map((column, colIndex) => (
-                    <div key={colIndex} className="en-gal-grid-col">
-                      {column.map((image, imageIndex) => (
-                        <Tile
-                          key={image.id}
-                          image={image}
-                          priority={colIndex < 2 && imageIndex < 2}
-                          reduceMotion={reduceMotion}
-                          staggerMs={reduceMotion ? 0 : (imageIndex % 3) * 45 + colIndex * 20}
-                          onOpen={openAt}
-                        />
-                      ))}
-                    </div>
+          <div
+            className="en-gal-view en-gal-view-grid"
+            hidden={expanded ? true : undefined}
+            aria-hidden={expanded || undefined}
+          >
+            <div ref={gridRef} className="en-gal-grid" aria-label="Photo wall">
+              {columns.map((column, colIndex) => (
+                <div key={colIndex} className="en-gal-grid-col">
+                  {column.map((image, imageIndex) => (
+                    <Tile
+                      key={image.id}
+                      image={image}
+                      priority={colIndex < 2 && imageIndex < 2}
+                      reduceMotion={reduceMotion}
+                      staggerMs={reduceMotion ? 0 : (imageIndex % 3) * 45 + colIndex * 20}
+                      onOpen={openAt}
+                    />
                   ))}
                 </div>
-                {hasMore ? (
-                  <div ref={sentinelRef} className="en-gal-sentinel" aria-hidden="true" />
-                ) : null}
-              </div>
-            )}
-          </AnimatePresence>
+              ))}
+            </div>
+            {hasMore ? (
+              <div ref={sentinelRef} className="en-gal-sentinel" aria-hidden="true" />
+            ) : null}
+          </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {expanded ? (
+          <motion.div
+            key="expand"
+            className="en-gal-lightbox"
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ExpandView
+              items={items}
+              index={selectedIndex}
+              onIndex={setSelectedIndex}
+              onClose={closeExpand}
+              reduceMotion={reduceMotion}
+            />
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
     </section>
   );
 }

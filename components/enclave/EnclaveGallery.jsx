@@ -265,10 +265,15 @@ function ExpandView({ items, index, onIndex, onClose, reduceMotion }) {
   }, [image, index, items]);
 
   useEffect(() => {
-    const active = document.querySelector(".en-gal-expand-thumb.is-on");
-    active?.scrollIntoView({
-      inline: "center",
-      block: "nearest",
+    const strip = document.querySelector(".en-gal-expand-strip");
+    const active = strip?.querySelector(".en-gal-expand-thumb.is-on");
+    if (!strip || !active) return;
+    const stripRect = strip.getBoundingClientRect();
+    const thumbRect = active.getBoundingClientRect();
+    const nextLeft =
+      strip.scrollLeft + (thumbRect.left - stripRect.left) - stripRect.width / 2 + thumbRect.width / 2;
+    strip.scrollTo({
+      left: Math.max(0, nextLeft),
       behavior: reduceMotion ? "auto" : "smooth",
     });
   }, [index, reduceMotion]);
@@ -439,7 +444,6 @@ export default function EnclaveGallery({
   const sentinelRef = useRef(null);
   const gridRef = useRef(null);
   const scrollVelRef = useRef(0);
-  const scrollYRef = useRef(0);
   const itemsRef = useRef([]);
   const visibleCountRef = useRef(INITIAL_BATCH);
   const expanded = selectedIndex != null;
@@ -558,30 +562,21 @@ export default function EnclaveGallery({
     };
   }, [expanded]);
 
-  // Lock body scroll while open; restore exact Y on close.
+  // Freeze page scroll under the popover — do not remount or hide the grid.
   useEffect(() => {
     if (!expanded) return undefined;
-    const y = scrollYRef.current;
     const { style } = document.body;
     const prevOverflow = style.overflow;
-    const prevPosition = style.position;
-    const prevTop = style.top;
-    const prevWidth = style.width;
+    const prevOverscroll = style.overscrollBehavior;
     style.overflow = "hidden";
-    style.position = "fixed";
-    style.top = `-${y}px`;
-    style.width = "100%";
+    style.overscrollBehavior = "none";
     return () => {
       style.overflow = prevOverflow;
-      style.position = prevPosition;
-      style.top = prevTop;
-      style.width = prevWidth;
-      window.scrollTo(0, y);
+      style.overscrollBehavior = prevOverscroll;
     };
   }, [expanded]);
 
   const openAt = useCallback((index) => {
-    scrollYRef.current = window.scrollY || window.pageYOffset || 0;
     setSelectedIndex(index);
   }, []);
 
@@ -596,11 +591,11 @@ export default function EnclaveGallery({
       aria-label="ENCLAVE gallery"
     >
       <div className="en-gallery-inner">
-        <div className={`en-gal-stage-wrap${expanded ? " is-expand" : ""}`}>
+        <div className="en-gal-stage-wrap">
           <div
             className="en-gal-view en-gal-view-grid"
-            hidden={expanded ? true : undefined}
             aria-hidden={expanded || undefined}
+            {...(expanded ? { inert: true } : {})}
           >
             <div ref={gridRef} className="en-gal-grid" aria-label="Photo wall">
               {columns.map((column, colIndex) => (
@@ -633,7 +628,7 @@ export default function EnclaveGallery({
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.18 }}
           >
             <ExpandView
               items={items}

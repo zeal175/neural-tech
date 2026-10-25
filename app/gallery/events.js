@@ -22,10 +22,10 @@ export const events = [
     featured: true,
     upcoming: false,
     short: "Enclave",
-    cover: "/gallery/logos/enclave-cover.jpg",
-    coverWidth: 674,
-    coverHeight: 1024,
-    coverRatio: "674 / 1024",
+    cover: "/gallery/logos/enclave-cover.png",
+    coverWidth: 1080,
+    coverHeight: 1920,
+    coverRatio: "1080 / 1920",
     blurb:
       "Find the exit. A maze, a rat, and instructions in plain English. You don’t need to know how to code — only how to think in steps. Solo or duo — register individually; teams are formed on the day. ₹50. 60 seats.",
     beats: [

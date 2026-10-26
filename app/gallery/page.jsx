@@ -4,6 +4,7 @@ import SiteHeader from "../components/SiteHeader";
 import Reveal from "../components/Reveal";
 import LineReveal from "../components/LineReveal";
 import MarqueeHero from "./MarqueeHero";
+import RoverDrift from "./rover/RoverDrift";
 import { events, formatEventDate } from "./events";
 import { listPhotoFiles, readPhotos } from "./photos";
 import { allFontClasses } from "./fonts";
@@ -68,7 +69,7 @@ export default function ArchiveHub() {
             <Link
               key={event.slug}
               href={`/gallery/${event.slug}`}
-              className="ar-row ar-link"
+              className={`ar-row ar-link${event.slug === "enclave" ? " ar-row-rover" : ""}`}
               style={event.theme.tokens}
             >
               <span className="ar-mark">
@@ -89,6 +90,7 @@ export default function ArchiveHub() {
               <span className="ar-go">
                 View <i>→</i>
               </span>
+              {event.slug === "enclave" ? <RoverDrift /> : null}
             </Link>
           ))}
 

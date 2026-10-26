@@ -75,6 +75,8 @@
 
 .en-gal-stage-wrap {
   position: relative;
+  /* a grid item: without this the masonry's min-content width pushes the last column off-screen */
+  min-width: 0;
   min-height: min(56vh, 640px);
 }
 

@@ -70,6 +70,22 @@
   max-width: 100%;
 }
 
+/* spiral: the nav floats over the full-height stage instead of pushing it down */
+.enc-show.is-spiral .enc-show-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* no backdrop blur over a live canvas: the stage's own veil darkens the top */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: transparent;
+}
+
+.enc-show-pending {
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
 .enc-show-foot {
   display: grid;
   gap: 20px;

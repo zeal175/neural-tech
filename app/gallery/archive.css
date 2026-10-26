@@ -286,3 +286,92 @@
     transition: none;
   }
 }
+
+/* ---------- Enclave row: the ENC-01 rover (rover/RoverDrift.jsx) ----------
+   Its canvas sits under the text, the CRT scan runs over both. */
+
+.ar-row-rover {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.ar-row-rover > span:not(.ar-rover) {
+  position: relative;
+  z-index: 1;
+}
+
+.ar-row-rover::before,
+.ar-row-rover::after {
+  z-index: 2;
+}
+
+.ar-rover {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.ar-rover[data-ready] {
+  opacity: 1;
+}
+
+/* touch screens: the rover's arrival is the hover */
+.ar-row-rover[data-rover="on"] {
+  background: var(--ev-bg);
+  color: var(--ev-ink);
+  border-color: var(--ev-line);
+}
+
+.ar-row-rover[data-rover="on"]::before {
+  transform: scaleY(1);
+}
+
+.ar-row-rover[data-rover="on"]::after {
+  opacity: 1;
+}
+
+.ar-row-rover[data-rover="on"] .ar-mark {
+  transform: scale(1.06) rotate(-2deg);
+  border-color: var(--ev-line);
+  border-radius: var(--ev-radius);
+  background: var(--ev-surface);
+}
+
+.ar-row-rover[data-rover="on"] .ar-title {
+  font-family: var(--font-pillar), var(--font-screamer), ui-sans-serif, sans-serif;
+  font-weight: 400;
+  font-size: clamp(1.85rem, 4.6vw, 2.85rem);
+  letter-spacing: 0.04em;
+  color: var(--ev-accent);
+}
+
+.ar-row-rover[data-rover="on"] .ar-meta {
+  color: var(--ev-dim);
+}
+
+.ar-row-rover[data-rover="on"] .ar-go {
+  color: var(--ev-accent);
+}
+
+/* phones: it parks at the right end, clear of the meta line */
+@media (max-width: 640px) {
+  .ar-row-rover {
+    padding-right: 92px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ar-rover[data-ready] {
+    opacity: 0;
+    transition: opacity 320ms ease-out;
+  }
+
+  .ar-row-rover:hover .ar-rover[data-ready],
+  .ar-row-rover:focus-visible .ar-rover[data-ready],
+  .ar-row-rover[data-rover="on"] .ar-rover[data-ready] {
+    opacity: 1;
+  }
+}

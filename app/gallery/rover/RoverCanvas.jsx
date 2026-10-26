@@ -39,13 +39,15 @@ function measureSpot(row) {
 }
 
 const smooth = (k) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
-const POOL = 0.42; // the floor light's strength
+const POOL = 0.42; // the follow-spot's pool on the floor
+const SPOT = 1.6; // ...and its light on the rover
 
 /** the stage: a soft pool of warm light on the floor where it parks (so the dark rover, its treads
  * above all, stands out from the ink bar), its blob shadow (stretches with speed), and the headlight
  * streak that runs ahead of the entry */
 function Floor({ api }) {
   const pool = useRef();
+  const spot = useRef();
   const shadow = useRef();
   const streak = useRef();
   const poolMat = useMemo(() => {
@@ -92,13 +94,23 @@ function Floor({ api }) {
     return new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
   }, []);
   api.current = (S, G) => {
-    // the light comes up as it drives in and goes down as it leaves
-    const on =
-      S.mode === "off" ? 0 : S.mode === "enter" ? smooth(S.pt / 0.7) : S.mode === "exit" ? 1 - smooth((S.pt - 0.25) / 0.6) : 1;
+    // the follow-spot (drift.js): a pool on the floor, smeared along its swing while it moves, and a
+    // real spot light above it, so the rover itself brightens when the beam catches it
+    const on = smooth(S.spotOn);
+    const vx = S.spotX.v;
+    const vz = S.spotZ.v;
+    const sp = Math.hypot(vx, vz);
     const pl = pool.current;
     pl.visible = on > 0.001;
-    pl.position.set(G.xPark, 0.0005, G.zPark - 0.22);
+    pl.position.set(S.spotX.x, 0.0005, S.spotZ.x - 0.15);
+    pl.rotation.set(-Math.PI / 2, 0, Math.abs(vx) > 1e-4 ? Math.atan(-vz / vx) * Math.min(1, sp / 0.5) : 0);
+    pl.scale.set(2.1 * S.spotSize.x * (1 + Math.min(0.5, sp * 0.09)), 1.15 * S.spotSize.x, 1);
     poolMat.opacity = POOL * on;
+    const L = spot.current;
+    L.intensity = SPOT * on;
+    L.position.set(S.spotX.x, 2.6, S.spotZ.x + 0.9);
+    L.target.position.set(S.spotX.x, 0, S.spotZ.x);
+    L.target.updateMatrixWorld();
     const sh = shadow.current;
     sh.visible = S.mode !== "off";
     sh.position.set(S.x, 0.001, S.z);
@@ -120,6 +132,8 @@ function Floor({ api }) {
       <mesh ref={pool} material={poolMat} rotation={[-Math.PI / 2, 0, 0]} scale={[2.1, 1.15, 1]} renderOrder={-1} visible={false}>
         <planeGeometry args={[1, 1]} />
       </mesh>
+      {/* always there (at 0 when dark), so turning it on never recompiles a shader */}
+      <spotLight ref={spot} angle={0.34} penumbra={0.9} decay={0} intensity={0} color="#ffe2cc" />
       <mesh ref={shadow} material={shadowMat} renderOrder={0} visible={false}>
         <planeGeometry args={[1, 1]} />
       </mesh>

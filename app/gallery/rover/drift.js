@@ -238,6 +238,11 @@ export function createSim(seed = 7) {
     bob: 0,
     streakAt: -9,
     streak: -1,
+    // the follow-spot on the floor: where it points, how wide it is, how bright (0..1)
+    spotX: { x: 0, v: 0 },
+    spotZ: { x: 0, v: 0 },
+    spotSize: { x: 1, v: 0 },
+    spotOn: 0,
     events: [],
     rng: mulberry32(seed),
   };
@@ -247,7 +252,7 @@ const cx = {};
 const cz = {};
 const cy = {};
 
-function start(S, path) {
+function start(S, path, G) {
   S.path = path;
   S.pt = 0;
   S.mode = path.kind;
@@ -256,6 +261,14 @@ function start(S, path) {
     S.headW.x = LEFT;
     S.headW.v = 0;
     S.look = 0;
+    // a dark stage: the spot waits in the wings, at the right edge where the rover will burst in
+    if (S.spotOn < 0.05) {
+      S.spotX.x = G.xEdgeR - 0.15;
+      S.spotZ.x = G.zPark - 0.3;
+      S.spotX.v = S.spotZ.v = 0;
+      S.spotSize.x = 1.25;
+      S.spotSize.v = 0;
+    }
   }
   if (path.kind === "exit") S.look = 0;
 }
@@ -276,6 +289,11 @@ export function parkNow(S, G) {
   S.headP.x = 0.1;
   S.headZ.x = S.pitch.x = S.roll.x = S.antX.x = S.antZ.x = 0;
   S.pupil = 1.22;
+  S.spotX.x = S.x;
+  S.spotZ.x = S.z;
+  S.spotSize.x = 1;
+  S.spotX.v = S.spotZ.v = S.spotSize.v = 0;
+  S.spotOn = 1;
 }
 
 const crossed = (a, b, at) => at != null && at > a && at <= b;
@@ -290,10 +308,10 @@ export function step(S, G, input, h) {
   S.events.length = 0;
 
   if (input.want === "in") {
-    if (S.mode === "off") start(S, buildEntry(G));
-    else if (S.mode === "exit") start(S, buildRepark(G, S));
+    if (S.mode === "off") start(S, buildEntry(G), G);
+    else if (S.mode === "exit") start(S, buildRepark(G, S), G);
   } else if (S.mode === "enter" || S.mode === "repark" || S.mode === "idle") {
-    start(S, buildExit(G, S));
+    start(S, buildExit(G, S), G);
   }
 
   const P = S.path;
@@ -417,6 +435,18 @@ export function step(S, G, input, h) {
   S.bob = S.mode === "idle" && !still ? Math.sin(S.t * 2.2) * 0.004 : 0;
   const sk = (S.t - S.streakAt) / 0.34;
   S.streak = sk >= 0 && sk <= 1 ? sk : -1;
+
+  // the follow-spot, worked like a stage operator's: it waits in the wings, whips after the rover
+  // on a spring (lagging the burst, swinging past the stop and settling back), opens up while the
+  // rover is fast and irises in a touch on the ka-chow. It never leaves the stage: past the right
+  // edge it holds there and goes dark as the rover escapes.
+  const wing = G.xEdgeR - 0.15;
+  spring(S.spotX, Math.min(S.x, wing), 130, 11, h);
+  spring(S.spotZ, S.z, 130, 11, h);
+  const iris = S.t >= S.glintAt && S.t - S.glintAt < 0.45 ? 0.14 : 0;
+  spring(S.spotSize, 1 + 0.3 * Math.min(1, S.speed / 4) - iris, 150, 10, h);
+  const onTarget = S.mode === "off" ? 0 : S.mode === "enter" ? clamp((S.pt - 0.06) / 0.34, 0, 1) : S.mode === "exit" ? (S.pt < 0.32 ? 1 : 0) : 1;
+  S.spotOn += (onTarget - S.spotOn) * (1 - Math.exp(-(S.mode === "enter" ? 30 : S.mode === "exit" ? 3.5 : 6) * h));
 }
 
 // ── poses for the fit ────────────────────────────────────────────────────────────────────────────

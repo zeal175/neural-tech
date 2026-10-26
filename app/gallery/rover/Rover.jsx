@@ -96,9 +96,8 @@ export const Rover = forwardRef(function Rover(_, ref) {
       const m = o.material;
       const name = m.name.toLowerCase();
       // the baked steel mirrors the studio softbox as a glowing panel: keep reflections lowish
-      // (event 2 uses 0.55; this rover is ~90 px tall and needs the steel to catch some light)
       if (name.startsWith("body") || name.startsWith("accent")) {
-        m.envMapIntensity = 0.9;
+        m.envMapIntensity = 0.7;
         // the atlas seen small and at grazing angles (the deck, the skirts): full anisotropic filtering,
         // and the plate relief toned down so it doesn't sparkle as the rover moves
         for (const t of [m.map, m.normalMap, m.roughnessMap, m.metalnessMap]) if (t) t.anisotropy = aniso;
@@ -143,7 +142,9 @@ export const Rover = forwardRef(function Rover(_, ref) {
       p[`tread${side}`]?.children.forEach((c) => {
         const m = /^wheel[LR](\d)$/.exec(c.name);
         if (m) p.wheels.push({ o: c, side, r: WHEEL_R[+m[1]] || 0.05 });
-        else if (c.material?.map) p.belts.push({ m: c.material, side });
+        // only the belt scrolls: the frame beside it shares the body's atlas texture, and scrolling
+        // that would slide the whole rover's paint around
+        else if (c.material?.name?.toLowerCase().startsWith("tread")) p.belts.push({ m: c.material, side });
       });
     }
     if (p.head) p.head.rotation.order = "YXZ";
@@ -213,14 +214,16 @@ export const Rover = forwardRef(function Rover(_, ref) {
           const s0 = pupil.userData.s0;
           pupil.scale.set(s0.x * S.pupil, s0.y * S.pupil * (1 - 0.9 * lid), s0.z);
         }
-        if (eye?.material) eye.material.emissiveIntensity = (2 + (still ? 0 : Math.sin(t * 3) * 0.25) + S.look * 0.8 + S.flare * 6) * (1 - 0.6 * lid);
-        if (tip?.material) tip.material.emissiveIntensity = 1.2 + (still ? 0 : Math.sin(t * 2.4) * 0.5) + S.flare * 2;
+        // glows sit near 1 so they stay ember (no bloom here: pushed past 1 they clip to a pale peach);
+        // only the ka-chow flare runs them white-hot
+        if (eye?.material) eye.material.emissiveIntensity = (1 + (still ? 0 : Math.sin(t * 3) * 0.1) + S.look * 0.2 + S.flare * 4) * (1 - 0.6 * lid);
+        if (tip?.material) tip.material.emissiveIntensity = 0.9 + (still ? 0 : Math.sin(t * 2.4) * 0.25) + S.flare * 1.5;
         if (lidar) lidar.rotation.y = S.lidar;
         // status LEDs: a slow chase in ember
         const pos = (t * 1.6) % 4;
         leds.forEach((led, i) => {
           led.material.emissive.copy(ACCENT);
-          led.material.emissiveIntensity = still ? 1.2 : 0.35 + 2.4 * near(i, pos, leds.length);
+          led.material.emissiveIntensity = still ? 0.9 : 0.25 + 1.1 * near(i, pos, leds.length);
         });
         for (const tl of [tailL, tailR]) if (tl?.material) tl.material.emissiveIntensity = 0.7 + S.brake * 4;
         if (rec?.material) rec.material.emissiveIntensity = still ? 1.5 : t % 1.2 < 0.15 ? 6 : 0.35;

@@ -307,18 +307,19 @@ export default function RoverCanvas({ director }) {
       camera={{ fov: FOV, near: 0.1, far: 40, position: [0, 1, 4] }}
       style={{ pointerEvents: "none" }}
       onCreated={({ gl }) => {
-        gl.toneMapping = THREE.ACESFilmicToneMapping;
-        gl.toneMappingExposure = 1.3;
+        // Khronos PBR Neutral keeps the ember paint its own colour (ACES pushes it orange) and rolls
+        // the chrome's highlights off without washing them out
+        gl.toneMapping = THREE.NeutralToneMapping;
+        gl.toneMappingExposure = 1.2;
         gl.setClearColor(0x000000, 0);
       }}
     >
-      {/* studio: warm key, cool fill, an ember rim from behind (brighter than event 2's showroom:
-          the rover is small here, on an ink bar) */}
-      <hemisphereLight args={["#d8e0f5", "#2a1c14", 1.1]} />
-      <directionalLight position={[-2.2, 4.2, 3.6]} intensity={3.6} color="#fff3e6" />
-      <directionalLight position={[2.8, 1.4, 2.4]} intensity={1.1} color="#c9d6f2" />
-      <directionalLight position={[1.6, 2.2, -3.4]} intensity={3.2} color="#f9725a" />
-      <directionalLight position={[-2.5, 1.6, -2.8]} intensity={0.9} color="#9fb2dd" />
+      {/* studio: warm key, cool fill, an ember rim from behind */}
+      <hemisphereLight args={["#d8e0f5", "#2a1c14", 0.9]} />
+      <directionalLight position={[-2.2, 4.2, 3.6]} intensity={2.9} color="#fff3e6" />
+      <directionalLight position={[2.8, 1.4, 2.4]} intensity={0.9} color="#c9d6f2" />
+      <directionalLight position={[1.6, 2.2, -3.4]} intensity={2.6} color="#f9725a" />
+      <directionalLight position={[-2.5, 1.6, -2.8]} intensity={0.7} color="#9fb2dd" />
       <Environment resolution={128} frames={1}>
         <Lightformer intensity={2} position={[-3, 4, 2]} scale={[5, 2, 1]} color="#fff2e6" />
         <Lightformer intensity={0.9} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[4, 4, 1]} color="#f4ece4" />

@@ -18,6 +18,10 @@ const INTRO_S = 1.7;
 const SETTLE_MS = 260;
 
 const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
+const glowPos = new THREE.Vector3();
+const glowQuat = new THREE.Quaternion();
+const glowScale = new THREE.Vector3();
+const glowNormal = new THREE.Vector3();
 
 function Motes({ radius, materialRef }) {
   const { geometry, material } = useMemo(() => {
@@ -308,17 +312,24 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
     if (!settledBefore) busy = true;
     store.want(order, centre, { fast: Math.abs(s.vel) > 9, settled: s.stillMs > SETTLE_MS });
 
-    // ember glow behind the focused card, faded out while scrolling
+    // ember glow behind the focused card, faded out while scrolling. It rides on the card itself:
+    // the glow is a ring with an empty middle the card covers, so left at a fixed spot it showed
+    // its hollow centre as a dark, haloed box whenever the spiral sat between two cards
     const gm = glow.current;
     if (gm) {
-      const i0 = Math.floor(clamp(s.shown, 0, n - 1));
-      const i1 = Math.min(n - 1, i0 + 1);
-      const w = helix.widths[i0] + (helix.widths[i1] - helix.widths[i0]) * (s.shown - i0);
-      gm.position.set(0, 0, helix.radius - 0.02);
-      gm.scale.set(w + 0.9, CARD_H + 0.9, 1);
-      glowMat.uniforms.uSize.value.set(w + 0.9, CARD_H + 0.9);
-      glowMat.uniforms.uCard.value.set(w, CARD_H);
-      glowMat.uniforms.uStrength.value = damp(glowMat.uniforms.uStrength.value, (1 - speed) * 0.55 * smoothstep(0.55, 1, intro / INTRO_S), 8, dt);
+      const fi = clamp(Math.round(s.shown), 0, n - 1);
+      const card = cards.list[fi];
+      card.updateWorldMatrix(true, false);
+      card.matrixWorld.decompose(glowPos, glowQuat, glowScale);
+      gm.quaternion.copy(glowQuat);
+      gm.position.copy(glowPos).addScaledVector(glowNormal.set(0, 0, 1).applyQuaternion(glowQuat), -0.02);
+      const w = glowScale.x;
+      const h = glowScale.y;
+      gm.scale.set(w + 0.9, h + 0.9, 1);
+      glowMat.uniforms.uSize.value.set(w + 0.9, h + 0.9);
+      glowMat.uniforms.uCard.value.set(w, h);
+      const settled = 1 - smoothstep(0.08, 0.3, Math.abs(s.shown - fi));
+      glowMat.uniforms.uStrength.value = damp(glowMat.uniforms.uStrength.value, (1 - speed) * settled * 0.55 * smoothstep(0.55, 1, intro / INTRO_S), 8, dt);
     }
 
     // embers drift with the scroll, slower than the cards

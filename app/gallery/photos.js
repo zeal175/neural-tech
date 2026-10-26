@@ -161,8 +161,19 @@ function readCaptions(dir) {
   }
 }
 
-/** Filenames only, sorted the way the wall shows them. Also the zip route's allow-list. */
-export function listPhotoFiles(slug) {
+function loadManifest(slug) {
+  if (!SAFE_SLUG.test(slug)) return null;
+  try {
+    const file = path.join(process.cwd(), "app", "gallery", "manifests", `${slug}.json`);
+    const raw = fs.readFileSync(file, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function listFromDisk(slug) {
   const dir = eventDir(slug);
   if (!dir) return [];
   try {
@@ -174,32 +185,46 @@ export function listPhotoFiles(slug) {
       .filter((name) => !SKIP_FILES.has(name.toLowerCase()))
       .sort(naturalCompare);
   } catch {
-    // Folder not created yet — the page renders its empty state instead.
     return [];
   }
 }
 
-export function readPhotos(slug, label = "") {
-  const dir = eventDir(slug);
-  if (!dir) return [];
-  const captions = readCaptions(dir);
+/** Filenames only, sorted the way the wall shows them. Also the zip route's allow-list. */
+export function listPhotoFiles(slug) {
+  const manifest = loadManifest(slug);
+  if (manifest) return manifest.map((photo) => photo.file);
+  return listFromDisk(slug);
+}
 
-  return listPhotoFiles(slug).map((file, index) => {
+export function readPhotos(slug, label = "") {
+  if (!SAFE_SLUG.test(slug)) return [];
+  const dir = eventDir(slug);
+  const captions = dir ? readCaptions(dir) : {};
+  const manifest = loadManifest(slug);
+
+  const rows = manifest
+    ? manifest
+    : listFromDisk(slug).map((file) => {
+        const dims = dir ? readDimensions(path.join(dir, file)) : { width: 1200, height: 900 };
+        return { file, width: dims.width || 1200, height: dims.height || 900 };
+      });
+
+  return rows.map((photo, index) => {
+    const file = photo.file;
     const entry = captions[file];
     const caption = typeof entry === "string" ? entry : entry?.caption || "";
     const alt =
       (typeof entry === "object" && entry?.alt) ||
       caption ||
       `${label ? `${label} — ` : ""}photo ${index + 1}`;
-    const { width, height } = readDimensions(path.join(dir, file));
 
     return {
       file,
       src: `/gallery/${slug}/${file}`,
       caption,
       alt,
-      width,
-      height,
+      width: photo.width || 1200,
+      height: photo.height || 900,
     };
   });
 }

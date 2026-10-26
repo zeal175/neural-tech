@@ -1,11 +1,13 @@
 // Bundles the photos a visitor marked into one download. Store-only ZIP (photos are
 // already compressed), streamed a file at a time, written by hand so the archive
 // stays dependency-free.
+//
+// Photos are fetched over HTTP from the CDN (`/gallery/...`) so serverless
+// functions do not have to ship the ~1GB public/gallery tree in their bundle.
 
-import fs from "node:fs";
 import path from "node:path";
 import { getEvent } from "@/app/gallery/events";
-import { eventDir, listPhotoFiles } from "@/app/gallery/photos";
+import { listPhotoFiles } from "@/app/gallery/photos";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -52,37 +54,37 @@ function dosStamp(date) {
 function localHeader({ name, crc, size, time, day, flags }) {
   const header = Buffer.alloc(LOCAL_HEADER);
   header.writeUInt32LE(0x04034b50, 0);
-  header.writeUInt16LE(20, 4); // version needed
+  header.writeUInt16LE(20, 4);
   header.writeUInt16LE(flags, 6);
-  header.writeUInt16LE(0, 8); // stored
+  header.writeUInt16LE(0, 8);
   header.writeUInt16LE(time, 10);
   header.writeUInt16LE(day, 12);
   header.writeUInt32LE(crc, 14);
   header.writeUInt32LE(size, 18);
   header.writeUInt32LE(size, 22);
   header.writeUInt16LE(name.length, 26);
-  header.writeUInt16LE(0, 28); // no extra field
+  header.writeUInt16LE(0, 28);
   return Buffer.concat([header, name]);
 }
 
 function centralHeader({ name, crc, size, time, day, flags, offset }) {
   const header = Buffer.alloc(CENTRAL_HEADER);
   header.writeUInt32LE(0x02014b50, 0);
-  header.writeUInt16LE(20, 4); // version made by
-  header.writeUInt16LE(20, 6); // version needed
+  header.writeUInt16LE(20, 4);
+  header.writeUInt16LE(20, 6);
   header.writeUInt16LE(flags, 8);
-  header.writeUInt16LE(0, 10); // stored
+  header.writeUInt16LE(0, 10);
   header.writeUInt16LE(time, 12);
   header.writeUInt16LE(day, 14);
   header.writeUInt32LE(crc, 16);
   header.writeUInt32LE(size, 20);
   header.writeUInt32LE(size, 24);
   header.writeUInt16LE(name.length, 28);
-  header.writeUInt16LE(0, 30); // extra
-  header.writeUInt16LE(0, 32); // comment
-  header.writeUInt16LE(0, 34); // disk number
-  header.writeUInt16LE(0, 36); // internal attrs
-  header.writeUInt32LE(0, 38); // external attrs
+  header.writeUInt16LE(0, 30);
+  header.writeUInt16LE(0, 32);
+  header.writeUInt16LE(0, 34);
+  header.writeUInt16LE(0, 36);
+  header.writeUInt32LE(0, 38);
   header.writeUInt32LE(offset, 42);
   return Buffer.concat([header, name]);
 }
@@ -118,23 +120,18 @@ function streamOf(generator) {
   });
 }
 
-async function* zipEntries(dir, entries) {
+async function* zipEntries(entries) {
   const central = [];
   let offset = 0;
 
   for (const entry of entries) {
-    const data = await fs.promises.readFile(path.join(dir, entry.file));
-    if (data.length !== entry.size) {
-      // The folder changed mid-request; fail loudly rather than ship a corrupt zip.
-      throw new Error(`size changed for ${entry.file}`);
-    }
-
+    const data = entry.data;
     const name = Buffer.from(entry.file, "utf8");
     const meta = {
       name,
       crc: crc32(data),
       size: data.length,
-      flags: /^[\x20-\x7e]*$/.test(entry.file) ? 0 : 0x0800, // bit 11 marks UTF-8 names
+      flags: /^[\x20-\x7e]*$/.test(entry.file) ? 0 : 0x0800,
       ...dosStamp(entry.modified),
     };
 
@@ -151,50 +148,59 @@ async function* zipEntries(dir, entries) {
 }
 
 export async function GET(request) {
-  const params = new URL(request.url).searchParams;
+  const url = new URL(request.url);
+  const params = url.searchParams;
   const slug = params.get("event") || "";
 
   const event = getEvent(slug);
-  const dir = eventDir(slug);
-  if (!event || !dir) {
+  if (!event || !/^[a-z0-9][a-z0-9-]*$/i.test(slug)) {
     return new Response("Unknown event.\n", { status: 404 });
   }
 
-  // Only names that actually sit in this event's folder survive, in wall order.
-  const requested = new Set(
-    params
-      .getAll("file")
-      .map((value) => path.basename(value.trim()))
-      .filter(Boolean),
-  );
-  const names = listPhotoFiles(slug).filter((file) => requested.has(file));
+  const allowed = new Set(listPhotoFiles(slug));
+  const requested = params
+    .getAll("file")
+    .map((value) => path.basename(value.trim()))
+    .filter((file) => allowed.has(file));
 
-  if (!names.length) {
+  if (!requested.length) {
     return new Response("Nothing to download.\n", { status: 400 });
   }
-  if (names.length > MAX_FILES) {
+  if (requested.length > MAX_FILES) {
     return new Response(`Too many files — ${MAX_FILES} max per zip.\n`, { status: 413 });
   }
 
+  const origin = url.origin;
   let total = 0;
   const entries = [];
-  for (const file of names) {
-    const stat = await fs.promises.stat(path.join(dir, file));
-    if (stat.size > MAX_FILE_BYTES) {
+
+  for (const file of requested) {
+    const response = await fetch(`${origin}/gallery/${slug}/${encodeURIComponent(file)}`, {
+      cache: "force-cache",
+    });
+    if (!response.ok) {
+      return new Response(`${file} could not be read.\n`, { status: 404 });
+    }
+    const buffer = Buffer.from(await response.arrayBuffer());
+    if (buffer.length > MAX_FILE_BYTES) {
       return new Response(`${file} is too large to bundle.\n`, { status: 413 });
     }
-    total += stat.size;
+    total += buffer.length;
     if (total > MAX_TOTAL_BYTES) {
       return new Response("That selection is too large to bundle.\n", { status: 413 });
     }
-    entries.push({ file, size: stat.size, modified: stat.mtime });
+    entries.push({
+      file,
+      data: buffer,
+      modified: new Date(response.headers.get("last-modified") || Date.now()),
+    });
   }
 
   const nameBytes = entries.reduce((sum, entry) => sum + Buffer.byteLength(entry.file, "utf8"), 0);
   const length =
     entries.length * (LOCAL_HEADER + CENTRAL_HEADER) + nameBytes * 2 + total + EOCD;
 
-  return new Response(streamOf(zipEntries(dir, entries)), {
+  return new Response(streamOf(zipEntries(entries)), {
     headers: {
       "Content-Type": "application/zip",
       "Content-Length": String(length),

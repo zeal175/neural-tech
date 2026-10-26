@@ -1,6 +1,11 @@
 const nextConfig = {
   outputFileTracingRoot: process.cwd(),
   transpilePackages: ["motion"],
+  // Gallery JPGs live on the CDN. Do NOT pack them into serverless functions —
+  // fs traces of public/gallery previously ballooned each function by ~1GB+.
+  outputFileTracingExcludes: {
+    "*": ["./public/gallery/**/*"],
+  },
   // The archive lightbox serves photos above the default quality of 75; Next 16
   // requires every quality value in use to be declared here.
   images: {

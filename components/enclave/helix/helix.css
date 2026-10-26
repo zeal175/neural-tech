@@ -54,15 +54,6 @@
     linear-gradient(180deg, rgb(5 4 3 / 0.95) 0%, transparent 17%, transparent 80%, rgb(7 6 5 / 0.96) 100%);
 }
 
-.hx-scan {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0.5;
-  background: repeating-linear-gradient(180deg, transparent 0 2px, rgb(0 0 0 / 0.18) 2px 3px);
-}
-
 /* film grain: one rasterised noise tile, moved in steps (compositor only) */
 .hx-grain {
   position: absolute;

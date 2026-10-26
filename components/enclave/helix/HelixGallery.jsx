@@ -352,7 +352,6 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
         </CanvasGuard>
 
         <div className="hx-veil" aria-hidden="true" />
-        <div className="hx-scan" aria-hidden="true" />
         <div className="hx-grain" aria-hidden="true" />
 
         <div className="hx-hud" aria-hidden="true">

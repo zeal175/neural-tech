@@ -22,7 +22,9 @@ const HALF_TRACK = 0.218;
 const EDGE = 0.26; // outer edge of a track: the body tips up about it
 export const BODY_ROLL = 0.6; // share of the roll that tips the whole rover; the rest leans the hull
 export const CHASSIS_ROLL = 0.4;
-const VIS_CAP = 1.7; // fastest the tracks visibly roll (m/s); anything quicker reads as a blur
+// fastest the tracks visibly roll (m/s): quicker, and the sprocket teeth and belt links step far enough
+// each frame to strobe (wagon-wheel flicker), so past this they just read as a blur
+const VIS_CAP = 0.7;
 
 // local bounds before the model has loaded (the model's own replace it)
 export const DEFAULT_BOX = { min: [-0.27, 0, -0.26], max: [0.27, 0.64, 0.25] };
@@ -628,17 +630,19 @@ const NOMINAL = { xPark: 0, zPark: 0, yawPark: PARK_YAW, xEdgeR: 2.4, xStart: 3.
 
 /**
  * Fits the camera to the worst pose of the whole drift, then lays the drift out for that camera.
- * `memo` keeps the swept outline between calls, so a height change (the row grows on hover) only
- * refits; a new width, model or parking gap replays the drift.
+ * The canvas (H px tall) is taller than the bar and centred on it: `band` is the bar's height, and
+ * the drift stays MARGIN px inside that. `memo` keeps the swept outline between calls, so a height
+ * change (the row grows on hover) only refits; a new width, model or parking gap replays the drift.
  */
-export function solveBar(W, H, box, spot, memo = {}) {
+export function solveBar(W, H, band, box, spot, memo = {}) {
+  const margin = (H - Math.min(band, H)) / 2 + MARGIN;
   const key = [Math.round(W / 8), box.min, box.max, spot.right ? "r" : [Math.round(spot.lo / 8), Math.round(spot.hi / 8)]].join("|");
   if (memo.key !== key) {
-    const first = fitRig(W, H, sweep(NOMINAL, box));
+    const first = fitRig(W, H, sweep(NOMINAL, box), margin);
     const outline = hull(sweep(layoutBar(first, box, spot), box));
     memo.pts = outline.flatMap(([z, y]) => [0, y, z]);
     memo.key = key;
   }
-  const rig = fitRig(W, H, memo.pts);
+  const rig = fitRig(W, H, memo.pts, margin);
   return { rig, G: layoutBar(rig, box, spot) };
 }

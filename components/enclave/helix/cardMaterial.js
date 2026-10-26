@@ -83,9 +83,6 @@ const fragmentShader = /* glsl */ `
     // everything but the focused card steps back a little
     col *= mix(0.7, 1.0, max(uFocus, uHover * 0.85));
 
-    // phosphor scanlines
-    col *= 1.0 - 0.06 * (0.5 + 0.5 * sin(gl_FragCoord.y * 1.9));
-
     // ember rim: a hairline on every front card, lit up on the focused one
     float rim = smoothstep(-aa * 3.0, -aa * 0.6, d);
     float rimOn = (0.18 + 0.82 * max(uFocus, uHover)) * face;

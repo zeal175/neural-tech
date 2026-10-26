@@ -103,7 +103,7 @@ function Floor({ api }) {
 function Stage({ director }) {
   const rover = useRef();
   const floor = useRef();
-  const { gl, scene, camera, size, invalidate } = useThree();
+  const { gl, scene, camera, size, invalidate, get } = useThree();
   const sim = useMemo(() => createSim(), []);
   const fx = useMemo(() => ({ dust: createDust(), skids: createSkids() }), []);
   const st = useRef({ rig: null, G: null, memo: {}, last: 0, acc: 0, warned: "", ready: false });
@@ -139,12 +139,14 @@ function Stage({ director }) {
     if (DEV) checkBounds();
   };
 
-  // fit the camera to the bar and measure where to park
+  // fit the camera to the bar (the band of the canvas the row shows) and measure where to park
   const refit = () => {
     const s = st.current;
-    if (!size.width || !size.height || !director.row) return;
+    const { width, height } = get().size;
+    if (!width || !height || !director.row) return;
     const box = rover.current?.box || DEFAULT_BOX;
-    const { rig, G } = solveBar(size.width, size.height, box, measureSpot(director.row), s.memo);
+    s.band = director.row.clientHeight;
+    const { rig, G } = solveBar(width, height, s.band, box, measureSpot(director.row), s.memo);
     s.rig = rig;
     s.G = G;
     const pose = cameraPose(rig);
@@ -155,12 +157,27 @@ function Stage({ director }) {
     camera.far = 40;
     camera.updateProjectionMatrix();
   };
-  // ...and again whenever the row resizes (it grows a little on hover)
+  // ...again when the canvas resizes (the window did)...
   useLayoutEffect(() => {
     refit();
     if (st.current.ready && director.freeze != null) freeze(director.freeze);
     invalidate();
   }, [size.width, size.height]); // eslint-disable-line react-hooks/exhaustive-deps
+  // ...and when the row grows or shrinks under it (it does on hover; the canvas doesn't, see archive.css)
+  useEffect(() => {
+    const row = director.row;
+    if (!row) return;
+    let h = row.clientHeight;
+    const ro = new ResizeObserver(() => {
+      if (row.clientHeight === h) return;
+      h = row.clientHeight;
+      refit();
+      if (st.current.ready && director.freeze != null) freeze(director.freeze);
+      invalidate();
+    });
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // shaders compiled and textures uploaded before the first hover, with the canvas still hidden
   useEffect(() => {
@@ -244,25 +261,27 @@ function Stage({ director }) {
     if (!body) return;
     body.updateWorldMatrix(true, false);
     const { min, max } = rover.current.box;
+    const { width: W, height: H } = get().size;
+    const lo = (H - s.band) / 2; // the bar's top edge in the canvas
     let top = Infinity;
     let bottom = -Infinity;
     let left = Infinity;
     let right = -Infinity;
     for (let i = 0; i < 8; i++) {
       corner.set(i & 1 ? max[0] : min[0], i & 2 ? max[1] : min[1], i & 4 ? max[2] : min[2]).applyMatrix4(body.matrixWorld).project(camera);
-      const x = ((corner.x + 1) / 2) * size.width;
-      const y = ((1 - corner.y) / 2) * size.height;
+      const x = ((corner.x + 1) / 2) * W;
+      const y = ((1 - corner.y) / 2) * H - lo;
       top = Math.min(top, y);
       bottom = Math.max(bottom, y);
       left = Math.min(left, x);
       right = Math.max(right, x);
     }
     const m = MARGIN - 0.75;
-    const out = top < m || bottom > size.height - m || (sim.mode === "idle" && (left < m || right > size.width - m));
+    const out = top < m || bottom > s.band - m || (sim.mode === "idle" && (left < m || right > W - m));
     const key = `${sim.mode}:${Math.round(sim.t * 2)}`;
     if (out && s.warned !== key) {
       s.warned = key;
-      console.warn("[rover] box leaves the bar", { mode: sim.mode, t: +sim.pt.toFixed(2), top: +top.toFixed(1), bottom: +bottom.toFixed(1), left: +left.toFixed(1), right: +right.toFixed(1), W: size.width, H: size.height });
+      console.warn("[rover] box leaves the bar", { mode: sim.mode, t: +sim.pt.toFixed(2), top: +top.toFixed(1), bottom: +bottom.toFixed(1), left: +left.toFixed(1), right: +right.toFixed(1), W, bar: s.band });
     }
   };
 
@@ -277,10 +296,13 @@ function Stage({ director }) {
 }
 
 export default function RoverCanvas({ director }) {
+  // supersampled: the rover is small and full of fine hardware (sprocket teeth, bolts, rivets) that
+  // shimmers as it moves at one sample per pixel
+  const dpr = Math.min(3, Math.max(2, window.devicePixelRatio * 1.5));
   return (
     <Canvas
       frameloop="demand"
-      dpr={[1, 2]}
+      dpr={dpr}
       gl={{ antialias: true, alpha: true, powerPreference: "default" }}
       camera={{ fov: FOV, near: 0.1, far: 40, position: [0, 1, 4] }}
       style={{ pointerEvents: "none" }}
@@ -297,7 +319,7 @@ export default function RoverCanvas({ director }) {
       <directionalLight position={[2.8, 1.4, 2.4]} intensity={1.1} color="#c9d6f2" />
       <directionalLight position={[1.6, 2.2, -3.4]} intensity={3.2} color="#f9725a" />
       <directionalLight position={[-2.5, 1.6, -2.8]} intensity={0.9} color="#9fb2dd" />
-      <Environment resolution={64} frames={1}>
+      <Environment resolution={128} frames={1}>
         <Lightformer intensity={2} position={[-3, 4, 2]} scale={[5, 2, 1]} color="#fff2e6" />
         <Lightformer intensity={0.9} position={[0, 5, 0]} rotation-x={Math.PI / 2} scale={[4, 4, 1]} color="#f4ece4" />
         <Lightformer intensity={1.1} position={[3, 2, -3]} scale={[2, 5, 1]} color="#f9725a" />

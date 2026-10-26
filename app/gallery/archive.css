@@ -42,21 +42,6 @@
   transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* CRT scan that only shows when the event look takes over */
-.ar-link::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0 2px,
-    color-mix(in srgb, var(--ev-accent) 7%, transparent) 2px 4px
-  );
-  transition: opacity 380ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
 .ar-link:hover,
 .ar-link:focus-visible {
   background: var(--ev-bg);
@@ -68,11 +53,6 @@
 .ar-link:hover::before,
 .ar-link:focus-visible::before {
   transform: scaleY(1);
-}
-
-.ar-link:hover::after,
-.ar-link:focus-visible::after {
-  opacity: 1;
 }
 
 .ar-mark {
@@ -288,7 +268,7 @@
 }
 
 /* ---------- Enclave row: the ENC-01 rover (rover/RoverDrift.jsx) ----------
-   Its canvas sits under the text, the CRT scan runs over both. */
+   Its canvas sits under the text and the accent bar. */
 
 .ar-row-rover {
   overflow: hidden;
@@ -300,14 +280,19 @@
   z-index: 1;
 }
 
-.ar-row-rover::before,
-.ar-row-rover::after {
+.ar-row-rover::before {
   z-index: 2;
 }
 
+/* Taller than the row and centred on it (the row clips the rest). The row grows a little on hover;
+   a canvas that resized with it would blank for a frame each time, mid-drift. */
 .ar-rover {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: max(220px, calc(100% + 40px));
+  transform: translateY(-50%);
   z-index: 0;
   display: block;
   pointer-events: none;
@@ -327,10 +312,6 @@
 
 .ar-row-rover[data-rover="on"]::before {
   transform: scaleY(1);
-}
-
-.ar-row-rover[data-rover="on"]::after {
-  opacity: 1;
 }
 
 .ar-row-rover[data-rover="on"] .ar-mark {

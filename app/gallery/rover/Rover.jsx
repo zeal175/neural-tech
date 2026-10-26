@@ -5,6 +5,7 @@
 // dilate, flare), antenna (whip), antenna_tip, lidar (spin), led0..3 (chase), tailL / tailR (brake),
 // sensor_led (rec blink), treadL / treadR (wheel* spin, belt* scroll).
 import { useGLTF } from "@react-three/drei";
+import { useThree } from "@react-three/fiber";
 import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import * as THREE from "three";
 import { BODY_ROLL, CHASSIS_ROLL } from "./drift";
@@ -81,6 +82,7 @@ function streakTexture() {
 
 export const Rover = forwardRef(function Rover(_, ref) {
   const { scene } = useGLTF(MODEL_URL);
+  const aniso = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
   const root = useRef();
   const tilt = useRef();
   const glint = useRef();
@@ -95,7 +97,13 @@ export const Rover = forwardRef(function Rover(_, ref) {
       const name = m.name.toLowerCase();
       // the baked steel mirrors the studio softbox as a glowing panel: keep reflections lowish
       // (event 2 uses 0.55; this rover is ~90 px tall and needs the steel to catch some light)
-      if (name.startsWith("body") || name.startsWith("accent")) m.envMapIntensity = 0.9;
+      if (name.startsWith("body") || name.startsWith("accent")) {
+        m.envMapIntensity = 0.9;
+        // the atlas seen small and at grazing angles (the deck, the skirts): full anisotropic filtering,
+        // and the plate relief toned down so it doesn't sparkle as the rover moves
+        for (const t of [m.map, m.normalMap, m.roughnessMap, m.metalnessMap]) if (t) t.anisotropy = aniso;
+        m.normalScale?.multiplyScalar(0.7);
+      }
       if (name.startsWith("accent")) m.color.copy(ACCENT);
       if (name.startsWith("glow")) {
         m.emissive.copy(ACCENT);
@@ -145,7 +153,7 @@ export const Rover = forwardRef(function Rover(_, ref) {
     // padded for the head turning and the antenna's whip
     const box = { min: [r3(b.min.x - 0.02), 0, r3(b.min.z - 0.02)], max: [r3(b.max.x + 0.02), r3(b.max.y + 0.01), r3(b.max.z + 0.02)] };
     return { model, p, box, c0: p.chassis?.position.y ?? 0.17 };
-  }, [scene]);
+  }, [scene, aniso]);
 
   const glintMat = useMemo(
     () => new THREE.SpriteMaterial({ map: starTexture(), blending: THREE.AdditiveBlending, depthTest: false, depthWrite: false, toneMapped: false, transparent: true }),

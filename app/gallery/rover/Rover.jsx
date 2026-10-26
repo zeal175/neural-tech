@@ -19,6 +19,27 @@ const TILES_PER_M = 14 / 1.155; // the belt's UV runs 14 links round a 1.155 m l
 const WHEEL_R = [0.064, 0.064, 0.046, 0.046, 0.046, 0.02, 0.02];
 const near = (i, pos, n) => Math.max(0, 1 - Math.min(Math.abs(i - pos), n - Math.abs(i - pos)));
 
+// A warm rim along the silhouette (Fresnel: surfaces turning away from the camera catch it), so the
+// dark hull and treads separate from the ink bar. Shared by every lit part of the rover.
+export const RIM = {
+  uRimColor: { value: new THREE.Color("#ffd6c2") },
+  uRimPower: { value: 4.5 }, // high: the true silhouette, not every face seen at a slant
+  uRimStrength: { value: 0.6 },
+};
+/** `k`: this part's share of the rim (the treads take the most) */
+function addRim(m, k) {
+  m.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, RIM);
+    shader.fragmentShader = shader.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform vec3 uRimColor;\nuniform float uRimPower;\nuniform float uRimStrength;")
+      .replace(
+        "#include <emissivemap_fragment>",
+        `#include <emissivemap_fragment>\n\ttotalEmissiveRadiance += uRimColor * (uRimStrength * ${k.toFixed(2)}) * pow(1.0 - saturate(dot(normal, normalize(vViewPosition))), uRimPower);`
+      );
+  };
+  m.customProgramCacheKey = () => `enc-rover-rim-${k}`;
+}
+
 function radial(size, stops) {
   const c = document.createElement("canvas");
   c.width = c.height = size;
@@ -117,16 +138,18 @@ export const Rover = forwardRef(function Rover(_, ref) {
         m.toneMapped = false;
       }
       if (name.startsWith("tread")) {
-        // each belt scrolls its own copy of the track (colour and relief together)
+        // each belt scrolls its own copy of the track (colour and relief together); a little
+        // glossier than event 2's, so the lugs catch the key light on the dark bar
         m.map = treadTexture().clone();
         m.map.needsUpdate = true;
         m.normalMap = treadNormalTexture().clone();
         m.normalMap.needsUpdate = true;
         m.normalScale = new THREE.Vector2(0.9, 0.9);
         m.color = new THREE.Color("#ffffff");
-        m.roughness = 0.82;
+        m.roughness = 0.62;
         m.metalness = 0;
       }
+      if (/^(body|accent|tread)/.test(name)) addRim(m, name.startsWith("tread") ? 1.6 : 0.8);
     });
     // the named parts; the web export keeps each small part's quantization in its own scale, so
     // scales animate relative to s0

@@ -9,7 +9,7 @@ import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import Dust, { createDust } from "./Dust";
 import { DEFAULT_BOX, FOV, MARGIN, STEP, cameraPose, createSim, parkNow, solveBar, step } from "./drift";
-import { MODEL_URL, Rover } from "./Rover";
+import { MODEL_URL, RIM, Rover } from "./Rover";
 import Skids, { createSkids } from "./Skids";
 
 const DEV = process.env.NODE_ENV !== "production";
@@ -38,10 +38,29 @@ function measureSpot(row) {
   return { lo: text, hi: go.left - r.left };
 }
 
-/** blob shadow (stretches with speed) and the headlight streak that runs ahead of the entry */
+const smooth = (k) => (k <= 0 ? 0 : k >= 1 ? 1 : k * k * (3 - 2 * k));
+const POOL = 0.42; // the floor light's strength
+
+/** the stage: a soft pool of warm light on the floor where it parks (so the dark rover, its treads
+ * above all, stands out from the ink bar), its blob shadow (stretches with speed), and the headlight
+ * streak that runs ahead of the entry */
 function Floor({ api }) {
+  const pool = useRef();
   const shadow = useRef();
   const streak = useRef();
+  const poolMat = useMemo(() => {
+    const map = gradient(256, 256, (g, w) => {
+      const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
+      r.addColorStop(0, "rgba(255,226,204,1)");
+      r.addColorStop(0.35, "rgba(255,196,170,0.55)");
+      r.addColorStop(0.7, "rgba(249,114,90,0.14)");
+      r.addColorStop(1, "rgba(249,114,90,0)");
+      g.fillStyle = r;
+      g.fillRect(0, 0, w, w);
+    });
+    map.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
+  }, []);
   const shadowMat = useMemo(() => {
     const map = gradient(128, 128, (g, w) => {
       const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2);
@@ -73,6 +92,13 @@ function Floor({ api }) {
     return new THREE.MeshBasicMaterial({ map, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
   }, []);
   api.current = (S, G) => {
+    // the light comes up as it drives in and goes down as it leaves
+    const on =
+      S.mode === "off" ? 0 : S.mode === "enter" ? smooth(S.pt / 0.7) : S.mode === "exit" ? 1 - smooth((S.pt - 0.25) / 0.6) : 1;
+    const pl = pool.current;
+    pl.visible = on > 0.001;
+    pl.position.set(G.xPark, 0.0005, G.zPark - 0.22);
+    poolMat.opacity = POOL * on;
     const sh = shadow.current;
     sh.visible = S.mode !== "off";
     sh.position.set(S.x, 0.001, S.z);
@@ -88,8 +114,12 @@ function Floor({ api }) {
       streakMat.opacity = Math.sin(k * Math.PI) * 0.85;
     }
   };
+  if (DEV) api.poolMat = poolMat;
   return (
     <>
+      <mesh ref={pool} material={poolMat} rotation={[-Math.PI / 2, 0, 0]} scale={[2.1, 1.15, 1]} renderOrder={-1} visible={false}>
+        <planeGeometry args={[1, 1]} />
+      </mesh>
       <mesh ref={shadow} material={shadowMat} renderOrder={0} visible={false}>
         <planeGeometry args={[1, 1]} />
       </mesh>
@@ -183,7 +213,7 @@ function Stage({ director }) {
   useEffect(() => {
     let gone = false;
     director.wake = () => invalidate();
-    if (DEV) window.__rover = { sim, scene, gl, camera, st: st.current }; // for poking at from the console
+    if (DEV) window.__rover = { sim, scene, gl, camera, st: st.current, floor, rim: RIM }; // for poking at from the console
     (async () => {
       const s = st.current;
       parkNow(sim, s.G);

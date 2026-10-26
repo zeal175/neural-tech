@@ -54,9 +54,10 @@ export const treadTexture = () =>
       const k = hd[i * 4] / 255;
       const y = Math.floor(i / s);
       const grain = (Math.random() - 0.5) * 6;
-      // rubber: dark grooves, worn lighter lug tops; the guide horn reads as dull metal
+      // rubber: dark grooves, worn lighter lug tops; the guide horn reads as dull metal (lighter than
+      // event 2's, which sat on a lit maze floor: on the ink bar the lugs have to read on their own)
       const metal = k > 0.5 && k < 0.7;
-      const v = metal ? 74 : 16 + k * 30 + (y < s * 0.06 ? 4 : 0);
+      const v = metal ? 100 : 26 + k * 52 + (y < s * 0.06 ? 4 : 0);
       img.data[i * 4] = v + grain + (metal ? 2 : 1);
       img.data[i * 4 + 1] = v + grain;
       img.data[i * 4 + 2] = v + grain - (metal ? 0 : 1);

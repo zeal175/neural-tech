@@ -8,9 +8,9 @@
 export const CARD_H = 1;
 const MIN_ASPECT = 0.74;
 const MAX_ASPECT = 1.42;
-const GAP = 0.1; // along the spiral, between neighbours
+const GAP = 0.16; // along the spiral, between neighbours
 const PER_TURN = 9; // roughly how many cards make one full turn
-const PITCH = 1.95; // height of one turn, in card heights (leaves room for the back strand)
+const PITCH = 2.35; // height of one turn, in card heights (leaves room for the back strand)
 
 export function cardWidth(photo) {
   const aspect = photo.width && photo.height ? photo.width / photo.height : 1.33;
@@ -44,21 +44,21 @@ export function sampleHelix(helix, f) {
 }
 
 /**
- * Camera for a viewport. On desktop the front card fills about a third of the stage height and
- * the helix stands in the middle like a column; on a phone the front card fills most of the
- * width and the spiral's sides run off the edges.
+ * Camera for a viewport. On desktop the front card fills roughly half the stage height (sides of
+ * the helix can crop); on a phone the front card fills most of the width.
  */
 export function viewFor(width, height, radius) {
   const aspect = width / Math.max(1, height);
   const portrait = aspect < 0.85;
-  const fov = portrait ? 56 : 48;
+  const fov = portrait ? 56 : 46;
   const tan = Math.tan(((fov / 2) * Math.PI) / 180);
   // distance to the front card: by height (span = card heights in view) and by width (a
   // landscape card takes at most this share of the width)
-  const byHeight = ((portrait ? 3.6 : 3.4) * CARD_H) / (2 * tan);
-  const byWidth = (MAX_ASPECT * CARD_H) / (portrait ? 0.82 : 0.4) / (2 * tan * aspect);
+  const byHeight = ((portrait ? 3.6 : 2.15) * CARD_H) / (2 * tan);
+  const byWidth = (MAX_ASPECT * CARD_H) / (portrait ? 0.82 : 0.58) / (2 * tan * aspect);
   let distance = Math.max(byHeight, byWidth) + radius;
-  // desktop: the silhouette (plus half a card) stays inside the frame
-  if (!portrait) distance = Math.max(distance, (radius + CARD_H * 0.6) / (tan * aspect));
+  // desktop: keep most of the near helix in frame, but don't pull back far enough to shrink the
+  // focused card — the sides can vignette off
+  if (!portrait) distance = Math.max(distance, (radius * 0.55 + CARD_H * 0.35) / (tan * aspect));
   return { fov, distance, portrait };
 }

@@ -3,7 +3,8 @@ import * as THREE from "three";
 // One photo card on the spiral. A unit plane (scaled to the card in the mesh), bent toward the
 // cylinder, cover-cropped, rounded, and graded by how squarely it faces the camera: the back of
 // the spiral reads as dim, desaturated ink, the front as the photo itself, the focused card gets
-// an ember rim. Scroll speed sheers and bends the cards and splits the colour channels a touch.
+// a soft cream lift (no coloured stroke). Scroll speed sheers and bends the cards and splits the
+// colour channels a touch.
 
 const vertexShader = /* glsl */ `
   uniform float uWidth;
@@ -42,8 +43,8 @@ const fragmentShader = /* glsl */ `
   uniform float uHover;
   uniform float uRgb;
   uniform float uReveal;
+  uniform float uPresence;
   uniform vec3 uInk;
-  uniform vec3 uEmber;
   varying vec2 vUv;
   varying float vFacing;
 
@@ -56,8 +57,8 @@ const fragmentShader = /* glsl */ `
     vec2 size = vec2(uWidth, 1.0);
     float d = roundBox((vUv - 0.5) * size, size * 0.5, 0.045);
     float aa = fwidth(d);
-    // uReveal fades the card in through coverage (alpha to coverage), so it never shows as a black block
-    float alpha = (1.0 - smoothstep(-aa, aa, d)) * uReveal;
+    // uReveal = intro unroll; uPresence = distance fade so far cards dissolve instead of lingering
+    float alpha = (1.0 - smoothstep(-aa, aa, d)) * uReveal * uPresence;
     if (alpha <= 0.0) discard;
 
     // seen from behind (the back of the spiral): keep the photo the right way round
@@ -78,17 +79,19 @@ const fragmentShader = /* glsl */ `
     // the back strand sinks into the ink; the front stays the photo
     float face = smoothstep(-0.35, 0.85, vFacing);
     float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
-    col = mix(vec3(luma) * vec3(1.0, 0.93, 0.88), col, mix(0.25, 1.0, face));
-    col = mix(uInk, col, mix(0.16, 1.0, face));
-    // everything but the focused card steps back a little
-    col *= mix(0.7, 1.0, max(uFocus, uHover * 0.85));
+    col = mix(vec3(luma) * vec3(1.0, 0.93, 0.88), col, mix(0.12, 1.0, face));
+    col = mix(uInk, col, mix(0.07, 1.0, face));
+    // neighbours dim hard so the focused card owns the frame
+    float lit = max(uFocus, uHover * 0.7);
+    col *= mix(0.28, 1.0, lit);
 
-    // ember rim: a hairline on every front card, lit up on the focused one
-    float rim = smoothstep(-aa * 3.0, -aa * 0.6, d);
-    float rimOn = (0.18 + 0.82 * max(uFocus, uHover)) * face;
-    col = mix(col, uEmber * (1.0 + uFocus * 0.6), rim * rimOn);
+    // focus cue: slight brightness + soft cream edge falloff (not a coloured border)
+    float edge = 1.0 - smoothstep(-aa * 0.5, 0.11, -d);
+    float mark = lit * face * uPresence;
+    col *= 1.0 + mark * 0.08;
+    col = mix(col, col * vec3(1.06, 1.03, 0.98) + vec3(0.04, 0.035, 0.028), edge * mark * 0.55);
 
-    gl_FragColor = vec4(col * mix(0.4, 1.0, uReveal), alpha);
+    gl_FragColor = vec4(col * mix(0.4, 1.0, uReveal) * mix(0.55, 1.0, uPresence), alpha);
     #include <colorspace_fragment>
   }
 `;
@@ -99,6 +102,7 @@ blank.needsUpdate = true;
 
 export const INK = new THREE.Color("#070605");
 export const EMBER = new THREE.Color("#f9725a");
+export const HALO = new THREE.Color("#f0e6d6");
 
 export function createCardMaterial({ width, radius }) {
   return new THREE.ShaderMaterial({
@@ -120,8 +124,8 @@ export function createCardMaterial({ width, radius }) {
       uHover: { value: 0 },
       uRgb: { value: 0 },
       uReveal: { value: 0 },
+      uPresence: { value: 0 },
       uInk: { value: INK },
-      uEmber: { value: EMBER },
     },
   });
 }
@@ -146,7 +150,7 @@ export function addGlow(material) {
   return material;
 }
 
-// Soft ember glow behind the focused card (additive, no post-processing needed).
+// Soft cream halo behind the focused card (additive, no post-processing needed).
 const glowVertex = /* glsl */ `
   varying vec2 vUv;
   void main() {
@@ -159,7 +163,7 @@ const glowFragment = /* glsl */ `
   uniform vec2 uSize;
   uniform vec2 uCard;
   uniform float uStrength;
-  uniform vec3 uEmber;
+  uniform vec3 uHalo;
   varying vec2 vUv;
 
   float roundBox(vec2 p, vec2 b, float r) {
@@ -171,10 +175,10 @@ const glowFragment = /* glsl */ `
     float d = roundBox((vUv - 0.5) * uSize, uCard * 0.5, 0.05);
     // fades to nothing before the quad's edge: the sRGB curve would lift a long tail into a box
     float reach = min(uSize.x - uCard.x, uSize.y - uCard.y) * 0.5;
-    float g = exp(-max(d, 0.0) * 11.0) * smoothstep(-0.01, 0.01, d) * (1.0 - smoothstep(reach * 0.45, reach * 0.95, d));
+    float g = exp(-max(d, 0.0) * 9.5) * smoothstep(-0.01, 0.01, d) * (1.0 - smoothstep(reach * 0.4, reach * 0.95, d));
     // premultiplied, encoded first: alpha builds up only where there is glow
     float a = g * uStrength;
-    gl_FragColor = vec4(linearToOutputTexel(vec4(uEmber, 1.0)).rgb * a, a);
+    gl_FragColor = vec4(linearToOutputTexel(vec4(uHalo, 1.0)).rgb * a, a);
   }
 `;
 
@@ -189,7 +193,7 @@ export function createGlowMaterial() {
       uSize: { value: new THREE.Vector2(2, 1.6) },
       uCard: { value: new THREE.Vector2(1.4, 1) },
       uStrength: { value: 0 },
-      uEmber: { value: EMBER },
+      uHalo: { value: HALO },
     },
   }));
 }

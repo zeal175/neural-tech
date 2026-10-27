@@ -43,15 +43,15 @@
   z-index: 0;
 }
 
-/* top and bottom sink into the page; corners vignette */
+/* top and bottom sink into the page; corners vignette — keeps the spiral dim around the focus */
 .hx-veil {
   position: absolute;
   inset: 0;
   z-index: 1;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 75% 70% at 50% 52%, transparent 52%, rgb(5 4 3 / 0.72) 100%),
-    linear-gradient(180deg, rgb(5 4 3 / 0.95) 0%, transparent 17%, transparent 80%, rgb(7 6 5 / 0.96) 100%);
+    radial-gradient(ellipse 58% 55% at 50% 50%, transparent 28%, rgb(5 4 3 / 0.55) 62%, rgb(5 4 3 / 0.88) 100%),
+    linear-gradient(180deg, rgb(5 4 3 / 0.97) 0%, transparent 14%, transparent 82%, rgb(7 6 5 / 0.98) 100%);
 }
 
 /* film grain: one rasterised noise tile, moved in steps (compositor only) */

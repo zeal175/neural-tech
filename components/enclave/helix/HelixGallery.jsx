@@ -14,7 +14,7 @@ import "./helix.css";
 const HelixCanvas = dynamic(() => import("./HelixCanvas"), { ssr: false });
 
 const STEP = 88;
-const STEP_PHONE = 64;
+const STEP_PHONE = 40;
 
 function pad(value, width = 3) {
   return String(value).padStart(width, "0");
@@ -60,7 +60,7 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
   const railRef = useRef(null);
   const cursorRef = useRef(null);
   const stepRef = useRef(STEP);
-  const drag = useRef({ down: false, moved: false, x: 0, y: 0, x0: 0, y0: 0, t: 0, v: 0, rail: false });
+  const drag = useRef({ down: false, moved: false, touch: false, x: 0, y: 0, x0: 0, y0: 0, t: 0, v: 0, rail: false });
   const inertia = useRef(0);
   const lastOpen = useRef(0);
   const live = useRef(null);
@@ -135,7 +135,8 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
       const raw = sync();
       if (raw > 0.3) setTouched(true);
       window.clearTimeout(timer);
-      timer = window.setTimeout(snap, 170);
+      // phones snap sooner so the spiral doesn't feel slack after a flick
+      timer = window.setTimeout(snap, stepRef.current <= STEP_PHONE ? 90 : 170);
     };
     sync();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -202,6 +203,8 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     const d = drag.current;
     d.down = true;
     d.moved = false;
+    // touch/pen: leave vertical scroll to the browser — capturing it here made mobile feel loose
+    d.touch = e.pointerType !== "mouse";
     d.x = d.x0 = e.clientX;
     d.y = d.y0 = e.clientY;
     d.t = performance.now();
@@ -212,6 +215,11 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     setPointer(e);
     const d = drag.current;
     if (!d.down) return;
+    if (d.touch) {
+      // fingers jitter more than a mouse; keep taps from counting as a scroll
+      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 22) d.moved = true;
+      return;
+    }
     if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 6) {
       d.moved = true;
       live.current.pointer.dragging = true;
@@ -223,7 +231,7 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     // a horizontal drag of about one card is one step; a vertical mouse drag pulls the page
     const cardPx = stageRef.current.clientHeight * 0.4;
     const dx = e.clientX - d.x;
-    const dy = e.pointerType === "mouse" ? e.clientY - d.y : 0;
+    const dy = e.clientY - d.y;
     const amount = -dx * (stepRef.current / cardPx) - dy;
     window.scrollBy({ top: amount, behavior: "instant" });
     const now = performance.now();
@@ -246,11 +254,22 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
       live.current.pointerMoved?.();
     };
     if (!d.moved) {
-      if (!cancelled) openAt(live.current.pick?.() ?? -1);
+      if (!cancelled) {
+        // refresh NDC for the lift point; on touch the raycast often misses, so fall back
+        // to the focused card (that's what "tap to open" means on the phone)
+        setPointer(e);
+        const hit = live.current.pick?.() ?? -1;
+        const at = hit >= 0 ? hit : Math.round(live.current.target);
+        openAt(at);
+      }
       lift();
       return;
     }
     lift();
+    if (d.touch) {
+      settleSoon();
+      return;
+    }
     // let a flick carry on, then the scroll-end snap settles it
     let v = d.v;
     let last = performance.now();

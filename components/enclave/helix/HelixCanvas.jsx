@@ -13,9 +13,12 @@ import { addGlow, blankTexture, coverScale, createCardMaterial, createGlowMateri
 import { buildHelix, CARD_H, sampleHelix, viewFor } from "./layout";
 import { createTextureStore } from "./textures";
 
-const WINDOW = 20; // cards either side of focus that are drawn (about two turns)
+const WINDOW = 12; // cards either side of focus that are drawn; presence fades them sooner
 const INTRO_S = 1.7;
 const SETTLE_MS = 260;
+// presence: full near focus, dissolved by ~FADE_OUT cards away (smoothstep high→low)
+const FADE_IN = 1.35;
+const FADE_OUT = 6.5;
 
 const easeOutQuart = (t) => 1 - Math.pow(1 - t, 4);
 const glowPos = new THREE.Vector3();
@@ -109,7 +112,7 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.scale.set(width, CARD_H, 1);
       mesh.visible = false;
-      mesh.userData = { index: i, theta: helix.theta[i], y: helix.y[i], focus: 0, hover: 0, has: 0, tex: null };
+      mesh.userData = { index: i, theta: helix.theta[i], y: helix.y[i], focus: 0, hover: 0, presence: 0, has: 0, tex: null };
       return mesh;
     });
     return { geometry, list };
@@ -201,13 +204,13 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
     let busy = false;
     s.frame += 1;
 
-    // scroll → shown focus, with inertia; velocity in cards per second
+    // scroll → shown focus, with inertia; phones track tighter so finger scroll doesn't lag
     const prev = s.shown;
-    s.shown = damp(s.shown, live.target, 7.5, dt);
+    s.shown = damp(s.shown, live.target, phone ? 16 : 7.5, dt);
     if (Math.abs(s.shown - live.target) < 0.0004) s.shown = live.target;
     else busy = true;
     const rawVel = (s.shown - prev) / Math.max(dt, 1e-3);
-    s.vel = damp(s.vel, rawVel, 10, dt);
+    s.vel = damp(s.vel, rawVel, phone ? 16 : 10, dt);
     if (Math.abs(s.vel) < 0.002) s.vel = 0;
     else busy = true;
     live.shown = s.shown;
@@ -240,7 +243,14 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
     const lo = Math.max(0, centre - WINDOW);
     const hi = Math.min(n - 1, centre + WINDOW);
     const [plo, phi] = s.range;
-    for (let i = plo; i <= phi; i++) if (i < lo || i > hi) cards.list[i].visible = false;
+    for (let i = plo; i <= phi; i++) {
+      if (i < lo || i > hi) {
+        const gone = cards.list[i];
+        gone.visible = false;
+        gone.userData.presence = 0;
+        gone.material.uniforms.uPresence.value = 0;
+      }
+    }
     s.range = [lo, hi];
 
     // hover (raycast only when the pointer moved or the spiral did)
@@ -277,10 +287,20 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
       u.focus = damp(u.focus, focus, 14, dt);
       u.hover = damp(u.hover, i === s.hover ? 1 : 0, 12, dt);
       if (Math.abs(u.hover - (i === s.hover ? 1 : 0)) > 0.002) busy = true;
+      // fade cards in/out by distance so the B&W spiral doesn't linger and steal focus
+      const wantPresence = k * smoothstep(FADE_OUT, FADE_IN, Math.abs(i - s.shown));
+      u.presence = damp(u.presence, wantPresence, 7.5, dt);
+      if (Math.abs(u.presence - wantPresence) > 0.004) busy = true;
+      if (u.presence < 0.012 && wantPresence < 0.012) {
+        mesh.visible = false;
+        continue;
+      }
       const lift = Math.max(u.hover, u.focus * (1 - speed));
-      mesh.scale.set(helix.widths[i] * (1 + lift * 0.035), CARD_H * (1 + lift * 0.035), 1);
+      const bump = phone ? 0.04 : 0.09;
+      mesh.scale.set(helix.widths[i] * (1 + lift * bump), CARD_H * (1 + lift * bump), 1);
       m.uFocus.value = u.focus;
       m.uHover.value = u.hover;
+      m.uPresence.value = u.presence;
       m.uLift.value = u.hover;
       m.uVel.value = velU;
       m.uRgb.value = rgb;
@@ -329,7 +349,7 @@ function Helix({ photos, live, onFocus, onHover, onReady }) {
       glowMat.uniforms.uSize.value.set(w + 0.9, h + 0.9);
       glowMat.uniforms.uCard.value.set(w, h);
       const settled = 1 - smoothstep(0.08, 0.3, Math.abs(s.shown - fi));
-      glowMat.uniforms.uStrength.value = damp(glowMat.uniforms.uStrength.value, (1 - speed) * settled * 0.55 * smoothstep(0.55, 1, intro / INTRO_S), 8, dt);
+      glowMat.uniforms.uStrength.value = damp(glowMat.uniforms.uStrength.value, (1 - speed) * settled * 0.38 * smoothstep(0.55, 1, intro / INTRO_S), 8, dt);
     }
 
     // embers drift with the scroll, slower than the cards

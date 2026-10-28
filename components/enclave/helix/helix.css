@@ -43,6 +43,30 @@
   z-index: 0;
 }
 
+/* Mobile tap target over the focused card — click works even when iOS cancels pointer events */
+.hx-open-hit {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 3;
+  width: min(78vw, 340px);
+  height: min(62vh, 560px);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 700px) {
+  .hx-open-hit {
+    display: block;
+  }
+}
+
 /* top and bottom sink into the page; corners vignette — keeps the spiral dim around the focus */
 .hx-veil {
   position: absolute;

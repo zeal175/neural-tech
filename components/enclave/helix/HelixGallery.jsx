@@ -60,9 +60,23 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
   const railRef = useRef(null);
   const cursorRef = useRef(null);
   const stepRef = useRef(STEP);
-  const drag = useRef({ down: false, moved: false, touch: false, x: 0, y: 0, x0: 0, y0: 0, t: 0, v: 0, rail: false });
+  const drag = useRef({
+    down: false,
+    moved: false,
+    touch: false,
+    skipClick: false,
+    x: 0,
+    y: 0,
+    x0: 0,
+    y0: 0,
+    t: 0,
+    t0: 0,
+    v: 0,
+    rail: false,
+  });
   const inertia = useRef(0);
   const lastOpen = useRef(0);
+  const openedAt = useRef(0);
   const live = useRef(null);
   if (!live.current) {
     live.current = {
@@ -170,11 +184,17 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
   const openAt = useCallback(
     (index) => {
       if (index < 0 || index >= n) return;
+      openedAt.current = performance.now();
       prefetchSharp(items[index].src);
       setOpen(index);
     },
     [items, n],
   );
+
+  /** Focused card — reliable on phones where WebGL raycasts / pointercancel miss taps. */
+  const openFocused = useCallback(() => {
+    openAt(Math.round(live.current.target));
+  }, [openAt]);
 
   // the scroll-end snap waits while a finger or a flick is still moving the page; nudge it after
   const settleSoon = () => window.dispatchEvent(new Event("scroll"));
@@ -203,11 +223,12 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     const d = drag.current;
     d.down = true;
     d.moved = false;
+    d.skipClick = false;
     // touch/pen: leave vertical scroll to the browser — capturing it here made mobile feel loose
     d.touch = e.pointerType !== "mouse";
     d.x = d.x0 = e.clientX;
     d.y = d.y0 = e.clientY;
-    d.t = performance.now();
+    d.t = d.t0 = performance.now();
     d.v = 0;
   };
 
@@ -217,11 +238,15 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     if (!d.down) return;
     if (d.touch) {
       // fingers jitter more than a mouse; keep taps from counting as a scroll
-      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 22) d.moved = true;
+      if (Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 28) {
+        d.moved = true;
+        d.skipClick = true;
+      }
       return;
     }
     if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) > 6) {
       d.moved = true;
+      d.skipClick = true;
       live.current.pointer.dragging = true;
       setDragging(true);
       setTouched(true);
@@ -253,23 +278,24 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
       live.current.pointer.inside = false;
       live.current.pointerMoved?.();
     };
-    if (!d.moved) {
-      if (!cancelled) {
-        // refresh NDC for the lift point; on touch the raycast often misses, so fall back
-        // to the focused card (that's what "tap to open" means on the phone)
-        setPointer(e);
-        const hit = live.current.pick?.() ?? -1;
-        const at = hit >= 0 ? hit : Math.round(live.current.target);
-        openAt(at);
-      }
+
+    // Phones: iOS often pointercancel's taps. Don't open here — the click / hit-target path does.
+    // Desktop: open on a clean press via raycast (or focused card if the hit misses).
+    if (!d.moved && !cancelled && !d.touch) {
+      setPointer(e);
+      const hit = live.current.pick?.() ?? -1;
+      openAt(hit >= 0 ? hit : Math.round(live.current.target));
+      d.skipClick = true;
       lift();
       return;
     }
+
     lift();
     if (d.touch) {
-      settleSoon();
+      if (d.moved) settleSoon();
       return;
     }
+    if (!d.moved) return;
     // let a flick carry on, then the scroll-end snap settles it
     let v = d.v;
     let last = performance.now();
@@ -287,6 +313,15 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
     };
     if (Math.abs(v) > 0.05) inertia.current = window.requestAnimationFrame(coast);
     else settleSoon();
+  };
+
+  // click survives iOS pointercancel; skip after a drag or a desktop pointer-open
+  const onStageClick = (e) => {
+    if (e.target.closest(".hx-rail")) return;
+    if (drag.current.skipClick || drag.current.moved) return;
+    if (performance.now() - openedAt.current < 400) return;
+    setTouched(true);
+    openFocused();
   };
 
   const onPointerLeave = () => {
@@ -356,6 +391,7 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
         onPointerUp={(e) => endDrag(e, false)}
         onPointerCancel={(e) => endDrag(e, true)}
         onPointerLeave={onPointerLeave}
+        onClick={onStageClick}
         onKeyDown={onKeyDown}
         {...(open != null ? { inert: true } : {})}
       >
@@ -369,6 +405,19 @@ export default function HelixGallery({ event, dateLabel = "", photos = [], onFai
             onFail={onFail}
           />
         </CanvasGuard>
+
+        {/* Phones: dedicated tap target over the focused card. Survives WebGL/pointercancel quirks. */}
+        <button
+          type="button"
+          className="hx-open-hit"
+          aria-label={`Open photo ${focus + 1} of ${n}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (drag.current.skipClick || drag.current.moved) return;
+            setTouched(true);
+            openFocused();
+          }}
+        />
 
         <div className="hx-veil" aria-hidden="true" />
         <div className="hx-grain" aria-hidden="true" />

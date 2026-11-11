@@ -13,8 +13,8 @@ export const events = [
   {
     slug: "oracle",
     title: "ORACLE",
-    kicker: "Upcoming · live contest",
-    date: "2026-11-12",
+    kicker: "Postponed",
+    date: "",
     time: "",
     venue: "CIIC Seminar Hall",
     mark: "/oracle/mark.jpg",

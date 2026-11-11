@@ -1,4 +1,4 @@
-import { Archivo, Yellowtail } from "next/font/google";
+import { Archivo, Bitcount_Prop_Single, Yellowtail } from "next/font/google";
 import { vt323 } from "@/app/gallery/fonts";
 import { ORACLE } from "@/lib/oracle/event";
 import "./oracle.css";
@@ -17,8 +17,16 @@ const yellowtail = Yellowtail({
   variable: "--font-yellowtail",
 });
 
-const title = `${ORACLE.title} · ${ORACLE.date}`;
-const description = `A live contest staged like a show, by ${ORACLE.club} and the ${ORACLE.department}. ${ORACLE.dateLong}, ${ORACLE.venue}. ${ORACLE.fee} per person, ${ORACLE.prize} prize pool.`;
+// the postponement notice
+const bitcount = Bitcount_Prop_Single({
+  subsets: ["latin"],
+  variable: "--font-bitcount",
+  // Next ships no fallback metrics for Bitcount
+  adjustFontFallback: false,
+});
+
+const title = `${ORACLE.title} · Postponed`;
+const description = `${ORACLE.title} has been postponed to a later date due to unforeseeable reasons. We're deeply sorry.`;
 
 export const metadata = {
   title,
@@ -39,5 +47,7 @@ export const viewport = {
 };
 
 export default function OracleLayout({ children }) {
-  return <div className={`oracle ${archivo.variable} ${vt323.variable} ${yellowtail.variable}`}>{children}</div>;
+  return (
+    <div className={`oracle ${archivo.variable} ${vt323.variable} ${yellowtail.variable} ${bitcount.variable}`}>{children}</div>
+  );
 }

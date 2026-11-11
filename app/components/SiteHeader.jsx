@@ -17,7 +17,7 @@ const navItems = [
 export default function SiteHeader() {
   const pathname = usePathname();
   const onJoin = pathname === "/join";
-  // the Oracle page has its own Register button where this one would sit
+  // the Oracle postponement notice keeps the header bare
   const onOracle = pathname.startsWith("/oracle");
   const onCream = pathname.startsWith("/gallery");
   const [menuOpen, setMenuOpen] = useState(false);
@@ -92,11 +92,11 @@ export default function SiteHeader() {
               </a>
             ))}
             <a
-              href="/oracle"
+              href="/enclave"
               onClick={() => setMenuOpen(false)}
               className={`md:hidden text-[0.88rem] font-normal transition-colors duration-200 ${menuOpen ? "text-soil/70 hover:text-soil" : navLink}`}
             >
-              Visit Oracle
+              Visit Enclave
             </a>
           </nav>
           <button
@@ -115,9 +115,9 @@ export default function SiteHeader() {
               className={`hidden md:inline-flex items-center justify-center rounded-full px-5 py-2.5 text-[0.84rem] font-normal transition-[transform,background-color] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-navy active:scale-[0.98] ${
                 compact ? "bg-soil text-cream" : "bg-cream text-soil hover:bg-white"
               }`}
-              href="/oracle"
+              href="/enclave"
             >
-              Visit Oracle
+              Visit Enclave
             </a>
           ) : null}
         </div>

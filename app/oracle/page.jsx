@@ -39,7 +39,7 @@ export default function OraclePage() {
             Three levels. One exit.
           </h2>
           <p className="or-sub">
-            ORACLE is a live contest staged like a show. You join from your laptop, but others are walking the same halls tonight. Three levels stand between you and the exit.
+            ORACLE is a live contest staged like a show. You play as a duo, and the two of you can share one laptop, but others are walking the same halls tonight. Three levels stand between you and the exit.
           </p>
 
           <ol className="or-rooms">

@@ -27,13 +27,13 @@ export const events = [
     coverHeight: 1497,
     coverRatio: "1400 / 1497",
     blurb:
-      "Find the exit. A live contest staged like a show: you join from your laptop, but others are walking the same halls. Three levels, one exit. ₹100 per person. ₹2,000 prize pool.",
+      "Find the exit. A live contest staged like a show: you play as a duo, and one laptop between the two of you is enough. Three levels, one exit. ₹100 per person. ₹2,000 prize pool.",
     beats: [
       "Infiltration. Set up the rules that guide your character through five guarded corridors.",
       "Spot the Glitch. Decide whether a record is genuine or fake from the records closest to it.",
       "The Vault. Pack the most valuable haul that fits in the bag, in four rooms.",
     ],
-    tags: ["live contest", "solo"],
+    tags: ["live contest", "duo"],
     stats: [],
     briefingHref: "/oracle",
     theme: themes.vhs,

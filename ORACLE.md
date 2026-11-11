@@ -12,14 +12,14 @@ of Science & Technology, with the Association for Computing Machinery.
 | Where | CIIC Seminar Hall, Crescent |
 | Entry | ₹100 per person |
 | Prize pool | ₹2,000 |
-| How you play | Solo, on your own laptop |
+| How you play | Duo: two of you, one laptop is enough |
 | Register | [forms.gle/A8jzwKZSy7hoHcCB6](https://forms.gle/A8jzwKZSy7hoHcCB6) |
 | Page | [neuraltech.club/oracle](https://www.neuraltech.club/oracle) (the standee's "Details" QR) |
 
 ## Three levels. One exit.
 
-You join from your laptop, but others are walking the same halls tonight. Three levels stand between
-you and the exit.
+You play as a duo, and the two of you can share one laptop, but others are walking the same halls
+tonight. Three levels stand between you and the exit.
 
 | | Level | What you do |
 | --- | --- | --- |

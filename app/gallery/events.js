@@ -11,6 +11,34 @@ export const ENCLAVE_URL = /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?/i.tes
 
 export const events = [
   {
+    slug: "oracle",
+    title: "ORACLE",
+    kicker: "Upcoming · live contest",
+    date: "2026-11-12",
+    time: "",
+    venue: "CIIC Seminar Hall",
+    mark: "/oracle/mark.jpg",
+    markAlt: "The Hollow from the ORACLE poster",
+    featured: true,
+    upcoming: true,
+    short: "Oracle",
+    cover: "/oracle/cover.jpg",
+    coverWidth: 1400,
+    coverHeight: 1497,
+    coverRatio: "1400 / 1497",
+    blurb:
+      "Find the exit. A live contest staged like a show: you join from your laptop, but others are walking the same halls. Three levels, one exit. ₹100 per person. ₹2,000 prize pool.",
+    beats: [
+      "Infiltration. Set up the rules that guide your character through five guarded corridors.",
+      "Spot the Glitch. Decide whether a record is genuine or fake from the records closest to it.",
+      "The Vault. Pack the most valuable haul that fits in the bag, in four rooms.",
+    ],
+    tags: ["live contest", "solo"],
+    stats: [],
+    briefingHref: "/oracle",
+    theme: themes.vhs,
+  },
+  {
     slug: "enclave",
     title: "ENCLAVE",
     kicker: "Live day · photos",

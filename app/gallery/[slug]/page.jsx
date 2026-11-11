@@ -5,12 +5,13 @@ import SiteHeader from "../../components/SiteHeader";
 import EventPhotos from "../EventPhotos";
 import EnclaveShowcase from "../EnclaveShowcase";
 import { events, getEvent } from "../events";
-import { readPhotos } from "../photos";
+import { listPhotoFiles, readPhotos } from "../photos";
 
 const wrap = "mx-auto w-full max-w-[1040px] px-5 sm:px-6";
 
 export function generateStaticParams() {
-  return events.map((event) => ({ slug: event.slug }));
+  // an upcoming event gets its wall once its photos are in
+  return events.filter((event) => !event.upcoming || listPhotoFiles(event.slug).length).map((event) => ({ slug: event.slug }));
 }
 
 export const dynamicParams = false;

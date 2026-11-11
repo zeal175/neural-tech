@@ -31,6 +31,29 @@ export const themes = {
     },
   },
 
+  // Oracle: the VHS poster. Values match the --or-* set in app/oracle/oracle.css.
+  vhs: {
+    name: "vhs",
+    font: "vt323",
+    chrome: { scanlines: true, glitch: false, sweep: false },
+    tokens: {
+      "--ev-bg": "#050506",
+      "--ev-surface": "#0c0c0e",
+      "--ev-line": "rgba(255, 246, 220, 0.14)",
+      "--ev-ink": "#fff6dc",
+      "--ev-dim": "rgba(255, 246, 220, 0.62)",
+      "--ev-accent": "#f7b25a",
+      "--ev-accent-dim": "#5fb7c2",
+      "--ev-accent-ink": "#050506",
+      "--ev-warn": "#ff4f6d",
+      "--ev-radius": "0px",
+      "--ev-display": "var(--font-vt323), ui-monospace, monospace",
+      "--ev-display-weight": "400",
+      "--ev-ui": "var(--font-poppins), ui-sans-serif, sans-serif",
+      "--ev-tracking": "0.04em",
+    },
+  },
+
   // Enclave: ink / ember from the standalone event site (`enclave/`).
   // Hover on /events only — the real Enclave page lives in that app.
   ember: {

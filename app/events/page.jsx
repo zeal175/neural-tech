@@ -96,18 +96,16 @@ export default function EventsPage() {
           >
             <div className="ev-band-inner">
               {event.cover ? (
-                <figure
-                  className="ev-cover"
-                  style={event.coverRatio ? { aspectRatio: event.coverRatio } : undefined}
-                >
+                <figure className="ev-cover">
                   <Image
                     src={event.cover}
                     alt=""
-                    fill
+                    width={event.coverWidth || 1600}
+                    height={event.coverHeight || 1200}
                     sizes="(max-width: 900px) 92vw, 46vw"
                     quality={75}
                     priority={index === 0}
-                    className="object-cover"
+                    className="ev-cover-img"
                   />
                 </figure>
               ) : null}
